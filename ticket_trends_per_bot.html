@@ -1,0 +1,280 @@
+
+<title>SW & HW Ticket Trends per Active Bot</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f4f5f7; color: #172b4d; padding: 24px; }
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #6b778c; margin-bottom: 24px; }
+  .kpi-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+  .kpi { background: #fff; border-radius: 8px; padding: 14px 18px; min-width: 130px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .kpi .val { font-size: 24px; font-weight: 700; line-height: 1; }
+  .kpi .lbl { font-size: 11px; color: #6b778c; margin-top: 3px; }
+  .kpi.hw .val { color: #de350b; }
+  .kpi.sw .val { color: #0052cc; }
+  .kpi.bots .val { color: #6554c0; }
+  .kpi.total .val { color: #172b4d; }
+
+  .card { background: #fff; border-radius: 8px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .card-sub { font-size: 11px; color: #6b778c; margin-bottom: 16px; }
+
+  .legend { display: flex; gap: 20px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .legend-dot { width: 12px; height: 3px; border-radius: 2px; }
+
+  svg text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .tooltip {
+    position: fixed; background: #172b4d; color: #fff; border-radius: 6px;
+    padding: 8px 12px; font-size: 12px; pointer-events: none; display: none;
+    line-height: 1.6; z-index: 100; white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+  }
+  .note { font-size: 11px; color: #97a0af; margin-top: 12px; }
+  .anomaly-note { background: #fffae6; border-left: 3px solid #ff991f; padding: 8px 12px; border-radius: 0 4px 4px 0; font-size: 11px; color: #974f00; margin-top: 12px; }
+</style>
+
+<h1>SW &amp; HW Ticket Trends per Active Bot</h1>
+<p class="subtitle">Weekly bug tickets (Thu–Wed) normalized by active fleet size &nbsp;·&nbsp; Oct 2, 2025 – Jun 15, 2026</p>
+
+<div class="kpi-row">
+  <div class="kpi hw"><div class="val" id="kpi-hw-latest">—</div><div class="lbl">HW tickets / 1k bots (latest wk)</div></div>
+  <div class="kpi sw"><div class="val" id="kpi-sw-latest">—</div><div class="lbl">SW tickets / 1k bots (latest wk)</div></div>
+  <div class="kpi bots"><div class="val" id="kpi-bots">—</div><div class="lbl">Active bots (latest wk)</div></div>
+  <div class="kpi total"><div class="val" id="kpi-total-tickets">—</div><div class="lbl">Total tickets in period</div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Tickets per 1,000 Active Bots — Weekly</div>
+  <div class="card-sub">Lower is better. Active bots = distinct hostnames with heartbeat that week.</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#de350b;height:3px;width:24px;"></div><span>HW tickets / 1k bots</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0052cc;height:3px;width:24px;"></div><span>SW tickets / 1k bots</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#dfe1e6;height:12px;width:12px;border-radius:2px;"></div><span>Active bots (right axis)</span></div>
+  </div>
+  <svg id="chart" width="100%" style="display:block;overflow:visible;"></svg>
+  <div class="anomaly-note">⚠ Week of Oct 23 excluded — heartbeat data shows only 244 active bots (likely a data gap), which would produce a spurious spike.</div>
+  <p class="note">Last data point covers Jun 11–15 only (week cut off at Jun 15, 2026). Active bots = shipped hostnames (via Shopify) with heartbeats that week, excluding returned robots (OMS). Repaired/recalled bots not excluded (data unavailable in this DB).</p>
+</div>
+
+<div class="card">
+  <div class="card-title">Raw Ticket Volume — Weekly</div>
+  <div class="card-sub">Absolute HW and SW bug ticket counts (not normalized).</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#de350b;height:12px;width:12px;border-radius:2px;"></div><span>HW tickets</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0052cc;height:12px;width:12px;border-radius:2px;"></div><span>SW tickets</span></div>
+  </div>
+  <svg id="bar-chart" width="100%" style="display:block;overflow:visible;"></svg>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const RAW = [
+  {w:'Oct 2',hw:22,sw:30,bots:1965,hw1k:11.2,sw1k:15.27},
+  {w:'Oct 9',hw:19,sw:22,bots:1995,hw1k:9.52,sw1k:11.03},
+  {w:'Oct 16',hw:18,sw:22,bots:1960,hw1k:9.18,sw1k:11.22},
+  // Oct 23 excluded (anomaly — only 180 bots in heartbeat data)
+  {w:'Oct 30',hw:28,sw:21,bots:2003,hw1k:13.98,sw1k:10.48},
+  {w:'Nov 6',hw:26,sw:18,bots:2027,hw1k:12.83,sw1k:8.88},
+  {w:'Nov 13',hw:40,sw:28,bots:1872,hw1k:21.37,sw1k:14.96},
+  {w:'Nov 20',hw:43,sw:43,bots:2133,hw1k:20.16,sw1k:20.16},
+  {w:'Nov 27',hw:38,sw:33,bots:2300,hw1k:16.52,sw1k:14.35},
+  {w:'Dec 4',hw:36,sw:40,bots:2532,hw1k:14.22,sw1k:15.8},
+  {w:'Dec 11',hw:54,sw:26,bots:3285,hw1k:16.44,sw1k:7.91},
+  {w:'Dec 18',hw:42,sw:33,bots:3635,hw1k:11.55,sw1k:9.08},
+  {w:'Dec 25',hw:39,sw:39,bots:4002,hw1k:9.75,sw1k:9.75},
+  {w:'Jan 1',hw:61,sw:26,bots:4218,hw1k:14.46,sw1k:6.16},
+  {w:'Jan 8',hw:56,sw:37,bots:4436,hw1k:12.62,sw1k:8.34},
+  {w:'Jan 15',hw:56,sw:39,bots:4576,hw1k:12.24,sw1k:8.52},
+  {w:'Jan 22',hw:53,sw:43,bots:4643,hw1k:11.42,sw1k:9.26},
+  {w:'Jan 29',hw:70,sw:34,bots:4697,hw1k:14.9,sw1k:7.24},
+  {w:'Feb 5',hw:55,sw:17,bots:4786,hw1k:11.49,sw1k:3.55},
+  {w:'Feb 12',hw:49,sw:23,bots:4842,hw1k:10.12,sw1k:4.75},
+  {w:'Feb 19',hw:39,sw:32,bots:4920,hw1k:7.93,sw1k:6.5},
+  {w:'Feb 26',hw:68,sw:19,bots:4994,hw1k:13.62,sw1k:3.8},
+  {w:'Mar 5',hw:56,sw:30,bots:5036,hw1k:11.12,sw1k:5.96},
+  {w:'Mar 12',hw:62,sw:30,bots:5107,hw1k:12.14,sw1k:5.87},
+  {w:'Mar 19',hw:57,sw:24,bots:5206,hw1k:10.95,sw1k:4.61},
+  {w:'Mar 26',hw:74,sw:17,bots:5266,hw1k:14.05,sw1k:3.23},
+  {w:'Apr 2',hw:82,sw:18,bots:5441,hw1k:15.07,sw1k:3.31},
+  {w:'Apr 9',hw:72,sw:15,bots:5561,hw1k:12.95,sw1k:2.7},
+  {w:'Apr 16',hw:68,sw:19,bots:5736,hw1k:11.85,sw1k:3.31},
+  {w:'Apr 23',hw:88,sw:25,bots:5889,hw1k:14.94,sw1k:4.25},
+  {w:'Apr 30',hw:69,sw:20,bots:6057,hw1k:11.39,sw1k:3.3},
+  {w:'May 7',hw:110,sw:21,bots:6319,hw1k:17.41,sw1k:3.32},
+  {w:'May 14',hw:120,sw:17,bots:6480,hw1k:18.52,sw1k:2.62},
+  {w:'May 21',hw:79,sw:30,bots:6762,hw1k:11.68,sw1k:4.44},
+  {w:'May 28',hw:98,sw:34,bots:6871,hw1k:14.26,sw1k:4.95},
+  {w:'Jun 4',hw:107,sw:20,bots:7003,hw1k:15.28,sw1k:2.86},
+  {w:'Jun 11–15',hw:75,sw:11,bots:7032,hw1k:10.67,sw1k:1.56},
+];
+
+const last = RAW[RAW.length-1];
+document.getElementById('kpi-hw-latest').textContent = last.hw1k.toFixed(1);
+document.getElementById('kpi-sw-latest').textContent = last.sw1k.toFixed(1);
+document.getElementById('kpi-bots').textContent = last.bots.toLocaleString();
+const totalTickets = RAW.reduce((s,d)=>s+d.hw+d.sw,0);
+document.getElementById('kpi-total-tickets').textContent = totalTickets.toLocaleString();
+
+// ─── Line chart ───────────────────────────────────────────────────────────────
+function drawLineChart() {
+  const svg = document.getElementById('chart');
+  const W = svg.getBoundingClientRect().width || 800;
+  const H = 320, pad = {top:16, right:70, bottom:40, left:48};
+  const iw = W - pad.left - pad.right;
+  const ih = H - pad.top - pad.bottom;
+  svg.setAttribute('height', H);
+  svg.innerHTML = '';
+
+  const n = RAW.length;
+  const maxRate = Math.ceil(Math.max(...RAW.map(d=>Math.max(d.hw1k,d.sw1k))) / 5) * 5;
+  const maxBots = Math.max(...RAW.map(d=>d.bots));
+
+  const xScale = i => pad.left + (i / (n-1)) * iw;
+  const yScale = v => pad.top + ih - (v / maxRate) * ih;
+  const yBots  = v => pad.top + ih - (v / (maxBots * 1.1)) * ih;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs={}, parent=svg) => {
+    const e = document.createElementNS(ns, tag);
+    Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
+    parent.appendChild(e); return e;
+  };
+
+  // Bot count bars (background)
+  RAW.forEach((d,i) => {
+    const bh = ih - (yBots(d.bots) - pad.top);
+    el('rect', {x: xScale(i)-5, y: yBots(d.bots), width:10, height: bh,
+      fill:'#dfe1e6', opacity:0.5, rx:2});
+  });
+
+  // Grid lines
+  for (let v=0; v<=maxRate; v+=5) {
+    el('line', {x1:pad.left, x2:pad.left+iw, y1:yScale(v), y2:yScale(v),
+      stroke:'#f4f5f7', 'stroke-width':1});
+    el('text', {x:pad.left-4, y:yScale(v)+4, 'text-anchor':'end',
+      'font-size':10, fill:'#97a0af'}).textContent = v;
+  }
+
+  // Right axis labels (bots)
+  [0, 2000, 4000, 6000, 8000].forEach(v => {
+    if (v <= maxBots*1.1) {
+      el('text', {x:pad.left+iw+4, y:yBots(v)+4, 'text-anchor':'start',
+        'font-size':9, fill:'#b3bac5'}).textContent = (v/1000)+'k';
+    }
+  });
+
+  // X axis labels (every 4 weeks)
+  RAW.forEach((d,i) => {
+    if (i % 4 === 0 || i === n-1) {
+      el('text', {x:xScale(i), y:pad.top+ih+14, 'text-anchor':'middle',
+        'font-size':10, fill:'#6b778c'}).textContent = d.w;
+    }
+  });
+
+  // Axes
+  el('line', {x1:pad.left, x2:pad.left+iw, y1:pad.top+ih, y2:pad.top+ih, stroke:'#dfe1e6'});
+  el('line', {x1:pad.left, x2:pad.left, y1:pad.top, y2:pad.top+ih, stroke:'#dfe1e6'});
+
+  // Lines
+  const linePath = (key, color) => {
+    const pts = RAW.map((d,i) => `${i===0?'M':'L'}${xScale(i).toFixed(1)},${yScale(d[key]).toFixed(1)}`).join(' ');
+    el('path', {d:pts, fill:'none', stroke:color, 'stroke-width':2.5, 'stroke-linejoin':'round'});
+  };
+  linePath('hw1k','#de350b');
+  linePath('sw1k','#0052cc');
+
+  // Dots + hover targets
+  const tooltip = document.getElementById('tooltip');
+  RAW.forEach((d,i) => {
+    ['hw1k','sw1k'].forEach(key => {
+      const color = key==='hw1k'?'#de350b':'#0052cc';
+      const dot = el('circle', {cx:xScale(i), cy:yScale(d[key]), r:3.5,
+        fill:color, stroke:'#fff', 'stroke-width':1.5});
+    });
+    // Invisible hover rect
+    const rect = el('rect', {x:xScale(i)-8, y:pad.top, width:16, height:ih,
+      fill:'transparent', style:'cursor:default'});
+    rect.addEventListener('mousemove', e => {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX+14)+'px';
+      tooltip.style.top  = (e.clientY-8)+'px';
+      tooltip.innerHTML =
+        `<b>${d.w}</b><br>` +
+        `🔴 HW: ${d.hw1k.toFixed(1)} / 1k bots (${d.hw} tickets)<br>` +
+        `🔵 SW: ${d.sw1k.toFixed(1)} / 1k bots (${d.sw} tickets)<br>` +
+        `🤖 Active bots: ${d.bots.toLocaleString()}`;
+    });
+    rect.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+  });
+
+  // Y axis label
+  const lbl = el('text', {'text-anchor':'middle', fill:'#6b778c', 'font-size':11,
+    transform:`rotate(-90) translate(${-(pad.top+ih/2)},12)`});
+  lbl.textContent = 'Tickets per 1,000 bots';
+}
+
+// ─── Bar chart ────────────────────────────────────────────────────────────────
+function drawBarChart() {
+  const svg = document.getElementById('bar-chart');
+  const W = svg.getBoundingClientRect().width || 800;
+  const H = 240, pad = {top:16, right:16, bottom:40, left:48};
+  const iw = W - pad.left - pad.right;
+  const ih = H - pad.top - pad.bottom;
+  svg.setAttribute('height', H);
+  svg.innerHTML = '';
+
+  const n = RAW.length;
+  const maxTotal = Math.max(...RAW.map(d=>d.hw+d.sw));
+  const xScale = i => pad.left + (i / n) * iw;
+  const bw = iw / n * 0.75;
+  const yScale = v => pad.top + ih - (v / (maxTotal * 1.1)) * ih;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs={}, parent=svg) => {
+    const e = document.createElementNS(ns, tag);
+    Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
+    parent.appendChild(e); return e;
+  };
+
+  // Grid
+  [0,50,100,150].forEach(v => {
+    if (v <= maxTotal*1.1) {
+      el('line', {x1:pad.left, x2:pad.left+iw, y1:yScale(v), y2:yScale(v),
+        stroke:'#f4f5f7', 'stroke-width':1});
+      el('text', {x:pad.left-4, y:yScale(v)+4, 'text-anchor':'end',
+        'font-size':10, fill:'#97a0af'}).textContent = v;
+    }
+  });
+
+  el('line', {x1:pad.left, x2:pad.left+iw, y1:pad.top+ih, y2:pad.top+ih, stroke:'#dfe1e6'});
+
+  const tooltip = document.getElementById('tooltip');
+  RAW.forEach((d,i) => {
+    const cx = xScale(i) + (iw/n)*0.125;
+    const hwH = ih * d.hw / (maxTotal*1.1);
+    const swH = ih * d.sw / (maxTotal*1.1);
+
+    el('rect', {x:cx, y:yScale(d.hw+d.sw), width:bw, height:swH, fill:'#4c9aff', rx:2});
+    el('rect', {x:cx, y:yScale(d.hw), width:bw, height:hwH, fill:'#de350b', rx:2});
+
+    if (i % 4 === 0 || i === n-1) {
+      el('text', {x:cx+bw/2, y:pad.top+ih+14, 'text-anchor':'middle',
+        'font-size':10, fill:'#6b778c'}).textContent = d.w;
+    }
+
+    const rect = el('rect', {x:cx, y:pad.top, width:bw, height:ih, fill:'transparent', style:'cursor:default'});
+    rect.addEventListener('mousemove', e => {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX+14)+'px';
+      tooltip.style.top  = (e.clientY-8)+'px';
+      tooltip.innerHTML = `<b>${d.w}</b><br>🔴 HW: ${d.hw}<br>🔵 SW: ${d.sw}<br>Total: ${d.hw+d.sw}`;
+    });
+    rect.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+  });
+}
+
+drawLineChart();
+drawBarChart();
+window.addEventListener('resize', () => { drawLineChart(); drawBarChart(); });
+</script>
