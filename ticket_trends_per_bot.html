@@ -39,13 +39,13 @@
 <div class="kpi-row">
   <div class="kpi hw"><div class="val" id="kpi-hw-latest">—</div><div class="lbl">HW tickets / 1k bots (latest wk)</div></div>
   <div class="kpi sw"><div class="val" id="kpi-sw-latest">—</div><div class="lbl">SW tickets / 1k bots (latest wk)</div></div>
-  <div class="kpi bots"><div class="val" id="kpi-bots">—</div><div class="lbl">Active bots (latest wk)</div></div>
+  <div class="kpi bots"><div class="val" id="kpi-bots">—</div><div class="lbl">Active bots (latest wk) — shipped &amp; not returned</div></div>
   <div class="kpi total"><div class="val" id="kpi-total-tickets">—</div><div class="lbl">Total tickets in period</div></div>
 </div>
 
 <div class="card">
   <div class="card-title">Tickets per 1,000 Active Bots — Weekly</div>
-  <div class="card-sub">Lower is better. Active bots = distinct hostnames with heartbeat that week.</div>
+  <div class="card-sub">Lower is better. <b>Active bots</b> = shipped hostnames (Shopify) with a heartbeat that week, after their ship date, excluding robots returned per OMS. Source: Octopus DB — closest available approximation to the Grafana definition.</div>
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#de350b;height:3px;width:24px;"></div><span>HW tickets / 1k bots</span></div>
     <div class="legend-item"><div class="legend-dot" style="background:#0052cc;height:3px;width:24px;"></div><span>SW tickets / 1k bots</span></div>
