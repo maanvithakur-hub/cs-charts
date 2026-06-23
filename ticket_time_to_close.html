@@ -209,12 +209,12 @@
   <div class="kpi">
     <div class="kpi-label">HW — Best Month (median)</div>
     <div class="kpi-value good">24.6h</div>
-    <div class="kpi-sub">May 2026 · ~2.7 biz days</div>
+    <div class="kpi-sub">May 2026 · ~2.7 biz days · to return label sent</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">HW — Current (Jun, median)</div>
     <div class="kpi-value bad">45.0h</div>
-    <div class="kpi-sub">~5 biz days · n=166</div>
+    <div class="kpi-sub">~5 biz days · n=166 · to return label sent</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Others — Current (Jun, median)</div>
@@ -234,7 +234,7 @@
 
     <div class="explainer-item">
       <h4>What is being measured?</h4>
-      <p>Business hours between when a ticket was <strong>created</strong> and when it was <strong>closed</strong> in HubSpot. Only Mon–Fri, 10am–7pm PT counts — nights and weekends are excluded. This makes it a fair measure of team responsiveness, not time spent waiting over the weekend.</p>
+      <p>Business hours between when a ticket was <strong>created</strong> and when it was <strong>closed</strong> in HubSpot. Only Mon–Fri, 10am–7pm PT counts — nights and weekends are excluded. <strong>For HW tickets specifically:</strong> tickets are manually closed when the return shipping label is sent — so this measures time to triage and initiate the return, not the full repair cycle. For SW, App, and Others, "closed" reflects full resolution.</p>
     </div>
 
     <div class="explainer-item">
@@ -269,7 +269,7 @@
 
   <div class="chart-card">
     <div class="chart-title">HW / SW / App Tickets — Median Business Hours to Close</div>
-    <div class="chart-desc">Tickets resolved within 30 days · Mon–Fri 10am–7pm PT only · hover for values and ticket counts</div>
+    <div class="chart-desc">Tickets resolved within 30 days · Mon–Fri 10am–7pm PT only · hover for values and ticket counts · HW = time to return label sent</div>
     <div class="chart-wrap">
       <canvas id="chartHW"></canvas>
     </div>
