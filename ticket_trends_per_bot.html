@@ -45,7 +45,7 @@
 
 <div class="card">
   <div class="card-title">Tickets per 1,000 Active Bots — Weekly</div>
-  <div class="card-sub">Lower is better. <b>Active bots</b> = shipped hostnames (Shopify) with a heartbeat that week, after their ship date, excluding robots returned per OMS. Source: Octopus DB — closest available approximation to the Grafana definition.</div>
+  <div class="card-sub">Lower is better. <b>Active bots</b> = shipped hostnames (Shopify) with a heartbeat in the last 14 days as of week end, after their ship date, excluding robots returned per OMS. Source: Octopus DB — closest available approximation to the Grafana definition.</div>
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#de350b;height:3px;width:24px;"></div><span>HW tickets / 1k bots</span></div>
     <div class="legend-item"><div class="legend-dot" style="background:#0052cc;height:3px;width:24px;"></div><span>SW tickets / 1k bots</span></div>
@@ -53,7 +53,7 @@
   </div>
   <svg id="chart" width="100%" style="display:block;overflow:visible;"></svg>
   <div class="anomaly-note">⚠ Week of Oct 23 excluded — heartbeat data shows only 244 active bots (likely a data gap), which would produce a spurious spike.</div>
-  <p class="note">Last data point covers Jun 11–15 only (week cut off at Jun 15, 2026). Active bots = shipped hostnames (via Shopify) with heartbeats that week, excluding returned robots (OMS). Repaired/recalled bots not excluded (data unavailable in this DB).</p>
+  <p class="note">Last data point covers Jun 11–15 only (week cut off at Jun 15, 2026). Active bots = shipped hostnames (via Shopify) with a heartbeat in the 14 days ending on the last day of the week, excluding returned robots (OMS). Repaired/recalled bots not excluded (data unavailable in this DB).</p>
 </div>
 
 <div class="card">
@@ -106,7 +106,7 @@ const RAW = [
   {w:'May 21',hw:79,sw:30,bots:6740,hw1k:11.72,sw1k:4.45},
   {w:'May 28',hw:98,sw:34,bots:6843,hw1k:14.32,sw1k:4.97},
   {w:'Jun 4',hw:107,sw:20,bots:6988,hw1k:15.31,sw1k:2.86},
-  {w:'Jun 11–15',hw:75,sw:11,bots:7074,hw1k:10.6,sw1k:1.55},
+  {w:'Jun 11–15',hw:75,sw:11,bots:7575,hw1k:9.9,sw1k:1.45},
 ];
 
 const last = RAW[RAW.length-1];
