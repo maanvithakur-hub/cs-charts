@@ -65,8 +65,9 @@
       margin-top: 4px;
     }
 
-    .kpi-value.good  { color: #34d399; }
-    .kpi-value.warn  { color: #fbbf24; }
+    .kpi-value.good    { color: #34d399; }
+    .kpi-value.warn    { color: #fbbf24; }
+    .kpi-value.bad     { color: #f87171; }
     .kpi-value.neutral { color: #60a5fa; }
 
     .charts-grid {
@@ -202,23 +203,23 @@
 <body>
 
 <h1>Time to Close — Ticket Trends</h1>
-<p class="subtitle">Jan – Jun 15, 2026 &nbsp;·&nbsp; full population from HubSpot (87–99% coverage per month) &nbsp;·&nbsp; split by <em>primary_category</em></p>
+<p class="subtitle">Jan – Jun 15, 2026 &nbsp;·&nbsp; business hours only (Mon–Fri, 10am–7pm PT) &nbsp;·&nbsp; tickets resolved within 30 days &nbsp;·&nbsp; split by <em>primary_category</em></p>
 
 <div class="kpi-row">
   <div class="kpi">
     <div class="kpi-label">HW — Best Month (median)</div>
-    <div class="kpi-value good">3.7 days</div>
-    <div class="kpi-sub">May 2026 · avg 7.2d</div>
+    <div class="kpi-value good">24.6h</div>
+    <div class="kpi-sub">May 2026 · ~2.7 biz days</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">HW — Current (Jun, median)</div>
-    <div class="kpi-value bad">11.3 days</div>
-    <div class="kpi-sub">avg 16.1d · n=209</div>
+    <div class="kpi-value bad">45.0h</div>
+    <div class="kpi-sub">~5 biz days · n=166</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Others — Current (Jun, median)</div>
-    <div class="kpi-value good">1.0 days</div>
-    <div class="kpi-sub">avg 4.3d · n=345</div>
+    <div class="kpi-value good">3.1h</div>
+    <div class="kpi-sub">same day · n=325</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Total Tickets Closed</div>
@@ -232,33 +233,33 @@
   <div class="explainer-grid">
 
     <div class="explainer-item">
-      <h4>What is "time to close"?</h4>
-      <p>The number of calendar days between when a ticket was <strong>created</strong> and when it was marked <strong>closed</strong> in HubSpot. This includes weekends and any time a ticket was on hold — it's wall-clock time, not active working time.</p>
+      <h4>What is being measured?</h4>
+      <p>Business hours between when a ticket was <strong>created</strong> and when it was <strong>closed</strong> in HubSpot. Only Mon–Fri, 10am–7pm PT counts — nights and weekends are excluded. This makes it a fair measure of team responsiveness, not time spent waiting over the weekend.</p>
+    </div>
+
+    <div class="explainer-item">
+      <h4>Why filter to tickets ≤ 30 days old?</h4>
+      <p>Many tickets sit open for months before finally being closed — a ticket created in October 2025 and closed in January 2026 would show up as a January ticket with a massive time-to-close, skewing the entire month. Limiting to tickets resolved within 30 days removes this backlog drag and shows the current team's actual resolution speed.</p>
     </div>
 
     <div class="explainer-item">
       <h4>Why median instead of average?</h4>
-      <p>Many tickets are created in one month but don't get resolved for weeks. When they finally close, they pull the <em>average</em> up dramatically — e.g. a ticket open for 80 days inflates the mean for its closing month. The <strong>median</strong> (the middle value when all tickets are sorted) is not affected by these outliers and better represents the typical customer experience.</p>
+      <p>Even after the 30-day filter, a few tickets take much longer than typical. The <strong>median</strong> (the middle value when all tickets are sorted by duration) ignores these outliers and represents what a typical customer experiences. The mean would still be pulled up by the slowest 5–10% of tickets.</p>
     </div>
 
     <div class="explainer-item">
       <h4>What does "n" mean?</h4>
-      <p><strong>n</strong> is the count of tickets in that category that were <em>closed</em> during that month. It is not the number of tickets opened. For example, if 209 HW tickets closed in June, <code>n=209</code> — some of those may have been opened months earlier.</p>
+      <p><strong>n</strong> is the count of tickets in that category that were <em>closed</em> in that month and resolved within 30 days of creation. Tickets older than 30 days at close are excluded from both the chart and the n count.</p>
     </div>
 
     <div class="explainer-item">
       <h4>How are categories defined?</h4>
-      <p>HubSpot tickets have a <code>primary_category</code> field. <strong>Robot HW</strong> = <code>ROBOT_HAREDWARE</code>, <strong>Robot SW</strong> = <code>ROBOT_SOFTWARE</code>, <strong>App</strong> = <code>APP</code>. All other values — including Shipping, Returns, Order Mgmt, Duplicates, and blank entries — are grouped as <strong>Others</strong>.</p>
-    </div>
-
-    <div class="explainer-item">
-      <h4>Data coverage</h4>
-      <p>All tickets closed between <strong>Jan 1 – Jun 15, 2026</strong> were fetched from HubSpot (87–99% of each month's total). Monthly totals shown are the exact HubSpot counts. A small final page per month (~1–13%) was not captured, so n values may be slightly understated.</p>
+      <p>HubSpot tickets have a <code>primary_category</code> field. <strong>Robot HW</strong> = <code>ROBOT_HAREDWARE</code>, <strong>Robot SW</strong> = <code>ROBOT_SOFTWARE</code>, <strong>App</strong> = <code>APP</code>. All other values — Shipping, Returns, Order Mgmt, Duplicates, blank entries — are grouped as <strong>Others</strong>.</p>
     </div>
 
     <div class="explainer-item">
       <h4>Color coding in the table</h4>
-      <p><span style="color:#34d399">Green</span> = ≤ 1 day &nbsp;·&nbsp; <span style="color:#cbd5e1">White</span> = 1–6 days &nbsp;·&nbsp; <span style="color:#fbbf24">Yellow</span> = 6–10 days &nbsp;·&nbsp; <span style="color:#f87171">Red</span> = &gt; 10 days. Thresholds are approximate — use as a directional guide, not hard SLAs.</p>
+      <p><span style="color:#34d399">Green</span> = ≤ 9h (same day) &nbsp;·&nbsp; <span style="color:#cbd5e1">White</span> = 9–45h (1–5 biz days) &nbsp;·&nbsp; <span style="color:#fbbf24">Yellow</span> = 45–72h (5–8 biz days) &nbsp;·&nbsp; <span style="color:#f87171">Red</span> = &gt; 72h (&gt; 8 biz days).</p>
     </div>
 
   </div>
@@ -267,15 +268,15 @@
 <div class="charts-grid">
 
   <div class="chart-card">
-    <div class="chart-title">HW / SW / App Tickets — Median Days to Close</div>
-    <div class="chart-desc">Median time to close per category. Hover for values and ticket counts.</div>
+    <div class="chart-title">HW / SW / App Tickets — Median Business Hours to Close</div>
+    <div class="chart-desc">Tickets resolved within 30 days · Mon–Fri 10am–7pm PT only · hover for values and ticket counts</div>
     <div class="chart-wrap">
       <canvas id="chartHW"></canvas>
     </div>
   </div>
 
   <div class="chart-card">
-    <div class="chart-title">Other Tickets — Median Days to Close</div>
+    <div class="chart-title">Other Tickets — Median Business Hours to Close</div>
     <div class="chart-desc">Shipping · Returns · Order Mgmt · Uncategorized · all non-HW/SW/App categories.</div>
     <div class="chart-wrap">
       <canvas id="chartOther"></canvas>
@@ -297,29 +298,30 @@
         <th colspan="2" style="border-left:1px solid #2d3748;color:#60a5fa">Others</th>
       </tr>
       <tr>
-        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
-        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
-        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
-        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median (biz hrs)</th>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median (biz hrs)</th>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median (biz hrs)</th>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median (biz hrs)</th>
       </tr>
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
   <p class="note">
-    Source: HubSpot <code>primary_category</code> + <code>time_to_close</code> fields. All times are calendar days (wall-clock, not business hours). See the methodology panel above for full details.
+    Only tickets closed within 30 days of creation are included. Business hours = Mon–Fri, 10am–7pm PT (9h/day). Source: HubSpot <code>primary_category</code>, <code>createdate</code>, <code>closed_date</code>.
   </p>
 </div>
 
 <script>
 const MONTHS = ["Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026 (1-15)"];
 
+// All values in business hours (Mon-Fri 10am-7pm PT), tickets resolved within 30 days only
 const DATA = {
-  "Jan 2026":        { total: 1021, hw_avg: 14.1916, hw_med: 8.3683,  hw_n: 235, sw_avg: 12.0434, sw_med: 6.7533,  sw_n: 176, ap_avg: 5.1823,  ap_med: 3.9452, ap_n: 19, ot_avg: 7.226,  ot_med: 1.4893, ot_n: 570 },
-  "Feb 2026":        { total: 687,  hw_avg: 7.4468,  hw_med: 5.0741,  hw_n: 213, sw_avg: 7.2021,  sw_med: 5.7462,  sw_n: 95,  ap_avg: 7.1987,  ap_med: 3.617,  ap_n: 16, ot_avg: 4.1319, ot_med: 1.5137, ot_n: 276 },
-  "Mar 2026":        { total: 836,  hw_avg: 12.0549, hw_med: 6.8649,  hw_n: 251, sw_avg: 10.7692, sw_med: 5.4557,  sw_n: 113, ap_avg: 6.3022,  ap_med: 4.9818, ap_n: 10, ot_avg: 4.2506, ot_med: 0.7993, ot_n: 426 },
-  "Apr 2026":        { total: 1011, hw_avg: 15.3997, hw_med: 6.1812,  hw_n: 264, sw_avg: 18.1836, sw_med: 7.9036,  sw_n: 69,  ap_avg: 11.9687, ap_med: 5.9373, ap_n: 12, ot_avg: 5.149,  ot_med: 0.9201, ot_n: 655 },
-  "May 2026":        { total: 1134, hw_avg: 7.1548,  hw_med: 3.6542,  hw_n: 256, sw_avg: 6.0658,  sw_med: 4.1509,  sw_n: 69,  ap_avg: 6.1969,  ap_med: 2.7698, ap_n: 10, ot_avg: 2.922,  ot_med: 0.9147, ot_n: 665 },
-  "Jun 2026 (1-15)": { total: 666,  hw_avg: 16.0788, hw_med: 11.3278, hw_n: 209, sw_avg: 16.8849, sw_med: 9.6251,  sw_n: 42,  ap_avg: 5.2569,  ap_med: 5.1483, ap_n: 4,  ot_avg: 4.2796, ot_med: 1.0319, ot_n: 345 },
+  "Jan 2026":        { total: 1021, hw_avg: 61.96, hw_med: 47.72, hw_n: 204, sw_avg: 56.87, sw_med: 40.73, sw_n: 160, ap_avg: 32.92, ap_med: 16.68, ap_n: 19, ot_avg: 28.81, ot_med: 9.0,  ot_n: 532 },
+  "Feb 2026":        { total: 687,  hw_avg: 44.25, hw_med: 29.14, hw_n: 209, sw_avg: 41.51, sw_med: 36.0,  sw_n: 93,  ap_avg: 43.05, ap_med: 16.78, ap_n: 16, ot_avg: 24.13, ot_med: 9.42, ot_n: 273 },
+  "Mar 2026":        { total: 836,  hw_avg: 51.46, hw_med: 28.66, hw_n: 221, sw_avg: 44.85, sw_med: 33.33, sw_n: 103, ap_avg: 38.28, ap_med: 28.95, ap_n: 10, ot_avg: 18.94, ot_med: 4.14, ot_n: 416 },
+  "Apr 2026":        { total: 1011, hw_avg: 48.68, hw_med: 31.45, hw_n: 226, sw_avg: 51.65, sw_med: 36.05, sw_n: 57,  ap_avg: 41.12, ap_med: 30.61, ap_n: 11, ot_avg: 19.98, ot_med: 5.29, ot_n: 637 },
+  "May 2026":        { total: 1134, hw_avg: 41.26, hw_med: 24.55, hw_n: 248, sw_avg: 36.89, sw_med: 34.16, sw_n: 68,  ap_avg: 38.74, ap_med: 18.31, ap_n: 10, ot_avg: 17.46, ot_med: 4.74, ot_n: 664 },
+  "Jun 2026 (1-15)": { total: 666,  hw_avg: 63.64, hw_med: 45.0,  hw_n: 166, sw_avg: 53.23, sw_med: 45.25, sw_n: 30,  ap_avg: 32.17, ap_med: 30.42, ap_n: 4,  ot_avg: 13.1,  ot_med: 3.07, ot_n: 325 },
 };
 
 const gridColor = "rgba(45,55,72,0.7)";
@@ -346,9 +348,9 @@ const baseOptions = {
           const key = ctx.dataset._key;
           const n = d ? d[key + '_n'] : null;
           const nStr = (n != null && ctx.dataset._showN) ? ` (n=${n})` : '';
-          return v == null
-            ? ` ${ctx.dataset.label}: no data`
-            : ` ${ctx.dataset.label}: ${v.toFixed(1)}d${nStr}`;
+          if (v == null) return ` ${ctx.dataset.label}: no data`;
+          const days = (v / 9).toFixed(1);
+          return ` ${ctx.dataset.label}: ${v.toFixed(1)}h (~${days} biz days)${nStr}`;
         }
       }
     }
@@ -356,7 +358,7 @@ const baseOptions = {
   scales: {
     x: { ticks: { color: "#64748b", font: { size: 11 } }, grid: { color: gridColor } },
     y: {
-      title: { display: true, text: "Days to Close", color: "#64748b", font: { size: 11 } },
+      title: { display: true, text: "Business Hours to Close", color: "#64748b", font: { size: 11 } },
       ticks: { color: "#64748b", font: { size: 11 } },
       grid: { color: gridColor },
       beginAtZero: true
@@ -364,29 +366,25 @@ const baseOptions = {
   }
 };
 
-// solid = median (typical), dashed = avg (inflated by old backlog tickets)
 function makeLine(label, key, color, suffix, opts = {}) {
-  const dashed = opts.dashed || false;
-  const showN  = opts.showN  || false;
+  const showN = opts.showN || false;
   return {
     label,
     _key: key,
     _showN: showN,
     data: MONTHS.map(m => DATA[m][key + suffix]),
     borderColor: color,
-    backgroundColor: dashed ? "transparent" : color + "18",
+    backgroundColor: color + "18",
     pointBackgroundColor: color,
-    pointRadius: dashed ? 3 : 5,
+    pointRadius: 5,
     pointHoverRadius: 7,
-    borderDash: dashed ? [5, 4] : [],
     tension: 0.35,
-    fill: !dashed,
-    borderWidth: dashed ? 1.5 : 2.5,
+    fill: true,
+    borderWidth: 2.5,
     spanGaps: true,
   };
 }
 
-// Chart 1: HW / SW / App — one median line per category
 new Chart(document.getElementById("chartHW"), {
   type: "line",
   data: {
@@ -400,7 +398,6 @@ new Chart(document.getElementById("chartHW"), {
   options: baseOptions,
 });
 
-// Chart 2: Others — one median line
 new Chart(document.getElementById("chartOther"), {
   type: "line",
   data: {
@@ -412,18 +409,19 @@ new Chart(document.getElementById("chartOther"), {
   options: baseOptions,
 });
 
+// Green ≤9h, white ≤45h, yellow ≤72h, red >72h
 function cls(v) {
   if (v === null) return "";
-  if (v <= 1)  return "good";
-  if (v <= 6)  return "";
-  if (v <= 10) return "warn";
+  if (v <= 9)  return "good";
+  if (v <= 45) return "";
+  if (v <= 72) return "warn";
   return "bad";
 }
 
 const tbody = document.getElementById("tableBody");
 MONTHS.forEach(m => {
   const d = DATA[m];
-  const fmt = v => v == null ? '—' : v.toFixed(2) + 'd';
+  const fmt = v => v == null ? '—' : v.toFixed(1) + 'h';
   const tr = document.createElement("tr");
   tr.innerHTML = `
     <td class="month">${m}</td>
