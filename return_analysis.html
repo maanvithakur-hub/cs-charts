@@ -58,6 +58,12 @@ tr:hover td{background:#f9f9fb}
 <div class="card"><div class="card-title">Counts by reason</div><table><tr><th>Reason</th><th>Count</th><th></th></tr><tr><td>Hardware issue</td><td>39</td><td><div class="bar-wrap"><div class="bar" style="width:140px;background:#0071e3"></div><span class="bar-n">18.4%</span></div></td></tr><tr><td>Cleaning performance</td><td>38</td><td><div class="bar-wrap"><div class="bar" style="width:136px;background:#34c759"></div><span class="bar-n">17.9%</span></div></td></tr><tr><td>Other/unknown</td><td>37</td><td><div class="bar-wrap"><div class="bar" style="width:133px;background:#ff9500"></div><span class="bar-n">17.5%</span></div></td></tr><tr><td>Edge/corner/tight spaces</td><td>33</td><td><div class="bar-wrap"><div class="bar" style="width:118px;background:#ff3b30"></div><span class="bar-n">15.6%</span></div></td></tr><tr><td>Long cleaning time</td><td>28</td><td><div class="bar-wrap"><div class="bar" style="width:101px;background:#af52de"></div><span class="bar-n">13.2%</span></div></td></tr><tr><td>Doesn't fit under furniture</td><td>22</td><td><div class="bar-wrap"><div class="bar" style="width:79px;background:#5ac8fa"></div><span class="bar-n">10.4%</span></div></td></tr><tr><td>Navigation/mapping</td><td>20</td><td><div class="bar-wrap"><div class="bar" style="width:72px;background:#ffcc00"></div><span class="bar-n">9.4%</span></div></td></tr><tr><td>Mopping performance</td><td>20</td><td><div class="bar-wrap"><div class="bar" style="width:72px;background:#ff6b35"></div><span class="bar-n">9.4%</span></div></td></tr><tr><td>Cost</td><td>16</td><td><div class="bar-wrap"><div class="bar" style="width:57px;background:#30b0c7"></div><span class="bar-n">7.5%</span></div></td></tr><tr><td>Noise</td><td>16</td><td><div class="bar-wrap"><div class="bar" style="width:57px;background:#4cd964"></div><span class="bar-n">7.5%</span></div></td></tr><tr><td>Vacuuming performance</td><td>14</td><td><div class="bar-wrap"><div class="bar" style="width:50px;background:#e040fb"></div><span class="bar-n">6.6%</span></div></td></tr><tr><td>Too complicated to use</td><td>12</td><td><div class="bar-wrap"><div class="bar" style="width:43px;background:#8bc34a"></div><span class="bar-n">5.7%</span></div></td></tr><tr><td>Water tank / mopping capacity</td><td>12</td><td><div class="bar-wrap"><div class="bar" style="width:43px;background:#ff5252"></div><span class="bar-n">5.7%</span></div></td></tr><tr><td>Odor</td><td>6</td><td><div class="bar-wrap"><div class="bar" style="width:22px;background:#40c4ff"></div><span class="bar-n">2.8%</span></div></td></tr><tr><td>Connectivity</td><td>6</td><td><div class="bar-wrap"><div class="bar" style="width:22px;background:#ffd740"></div><span class="bar-n">2.8%</span></div></td></tr><tr><td>Too much intervention</td><td>5</td><td><div class="bar-wrap"><div class="bar" style="width:18px;background:#69f0ae"></div><span class="bar-n">2.4%</span></div></td></tr><tr><td>Camera issues</td><td>5</td><td><div class="bar-wrap"><div class="bar" style="width:18px;background:#f06292"></div><span class="bar-n">2.4%</span></div></td></tr><tr><td>Privacy/camera concerns</td><td>2</td><td><div class="bar-wrap"><div class="bar" style="width:7px;background:#aed581"></div><span class="bar-n">0.9%</span></div></td></tr><tr><td>Semantics</td><td>2</td><td><div class="bar-wrap"><div class="bar" style="width:7px;background:#ce93d8"></div><span class="bar-n">0.9%</span></div></td></tr></table></div>
 </div>
 
+<p class="section-title">Fixable vs. Not a Good Fit</p>
+<div class="card" style="margin-bottom:16px">
+<div class="card-title">Most returns are fixable — a positive outlook</div>
+<div id="fixability-content"><span style="color:#8e8e93;font-size:13px">Computing…</span></div>
+</div>
+
 <p class="section-title">Hardware Issue Breakdown</p>
 <div class="grid2">
 <div class="card"><div class="card-title">Hardware sub-reasons</div>
@@ -2222,5 +2228,76 @@ function filterTable(q){
   });
   document.getElementById('rawCount').textContent='Showing '+shown+' of 212 records';
 }
+
+(function buildFixabilityTile(){
+  const NGF=new Set(["Doesn't fit under furniture","Cost","Water tank / mopping capacity","Privacy/camera concerns"]);
+  const rows=Array.from(document.querySelectorAll('#rawBody tr'));
+  let pureFixable=0,pureNGF=0,mixed=0,noReason=0;
+  rows.forEach(row=>{
+    const cells=row.querySelectorAll('td');
+    if(!cells[8])return;
+    const txt=cells[8].textContent.trim();
+    if(!txt||txt==='—'){noReason++;return;}
+    const parts=txt.split(',').map(s=>s.trim()).filter(s=>s&&s!=='—');
+    if(!parts.length){noReason++;return;}
+    const hasNGF=parts.some(r=>NGF.has(r));
+    const hasFix=parts.some(r=>!NGF.has(r));
+    if(hasFix&&!hasNGF)pureFixable++;
+    else if(!hasFix&&hasNGF)pureNGF++;
+    else mixed++;
+  });
+  const total=rows.length;
+  const saveable=pureFixable+mixed;
+  const pct=n=>Math.round(n/total*100);
+  const el=document.getElementById('fixability-content');
+  el.innerHTML=`
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      <div style="flex:2;min-width:160px;background:#f0faf4;border-radius:10px;padding:16px 18px;border:1px solid #a8e6b8">
+        <div style="font-size:30px;font-weight:700;color:#1a7f3c">${pct(saveable)}%</div>
+        <div style="font-size:13px;font-weight:600;color:#145523;margin-top:2px">Fixable</div>
+        <div style="font-size:11px;color:#6e6e73;margin-top:3px">${saveable} of ${total} robots had at least one improvable reason</div>
+      </div>
+      <div style="flex:1;min-width:140px;background:#f5f5f7;border-radius:10px;padding:16px 18px;border:1px solid #d1d1d6">
+        <div style="font-size:30px;font-weight:700;color:#3c3c43">${pct(pureNGF)}%</div>
+        <div style="font-size:13px;font-weight:600;color:#6e6e73;margin-top:2px">Not a good fit</div>
+        <div style="font-size:11px;color:#6e6e73;margin-top:3px">${pureNGF} robots — only product-limitation reasons</div>
+      </div>
+      <div style="flex:1;min-width:120px;background:#fff8ec;border-radius:10px;padding:16px 18px;border:1px solid #ffe0a0">
+        <div style="font-size:30px;font-weight:700;color:#7a4f00">${noReason}</div>
+        <div style="font-size:13px;font-weight:600;color:#7a4f00;margin-top:2px">No reason</div>
+        <div style="font-size:11px;color:#6e6e73;margin-top:3px">return reason not captured</div>
+      </div>
+    </div>
+    <div style="margin-bottom:4px;font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.04em">All ${total} returns</div>
+    <div style="display:flex;height:22px;border-radius:8px;overflow:hidden;margin-bottom:8px">
+      <div title="Purely fixable reasons: ${pureFixable}" style="flex:${pureFixable};background:#34c759"></div>
+      <div title="Mixed — has fixable AND product-fit reasons: ${mixed}" style="flex:${mixed};background:#a8e6b8"></div>
+      <div title="Not a good fit only: ${pureNGF}" style="flex:${pureNGF};background:#c7c7cc"></div>
+      <div title="No reason captured: ${noReason}" style="flex:${noReason};background:#e5e5ea"></div>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#6e6e73;margin-bottom:16px">
+      <span><span style="display:inline-block;width:10px;height:10px;background:#34c759;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Purely fixable: ${pureFixable}</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#a8e6b8;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Mixed (fixable + NGF): ${mixed}</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#c7c7cc;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Not a good fit only: ${pureNGF}</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#e5e5ea;border-radius:2px;vertical-align:middle;margin-right:3px"></span>No reason: ${noReason}</span>
+    </div>
+    <div style="font-size:12px;font-weight:600;color:#6e6e73;margin-bottom:8px">Product limitations — "not a good fit" (outside Matic's control):</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <div style="background:#f5f5f7;border-radius:20px;padding:5px 14px;font-size:12px">Doesn't fit under furniture <span style="color:#8e8e93">22</span></div>
+      <div style="background:#f5f5f7;border-radius:20px;padding:5px 14px;font-size:12px">Cost <span style="color:#8e8e93">16</span></div>
+      <div style="background:#f5f5f7;border-radius:20px;padding:5px 14px;font-size:12px">Water tank / mopping capacity <span style="color:#8e8e93">12</span></div>
+      <div style="background:#f5f5f7;border-radius:20px;padding:5px 14px;font-size:12px">Privacy / camera concerns <span style="color:#8e8e93">2</span></div>
+    </div>
+    <div style="background:#f0faf4;border-radius:10px;padding:14px 16px;border-left:3px solid #34c759">
+      <div style="font-size:13px;font-weight:700;color:#145523;margin-bottom:5px">If Matic fixed all fixable issues…</div>
+      <div style="font-size:13px;line-height:1.6;color:#1d1d1f">
+        The floor would be just <strong>${pureNGF} robots</strong> (${pct(pureNGF)}% of all returns) — those who returned
+        <em>solely</em> for product-fit reasons we can't change (robot height, price point, tank size, camera).
+        That's a potential <strong>${pct(saveable)}% reduction</strong> in returns. Hardware, cleaning performance,
+        navigation, mopping, and UX together drive the vast majority of return decisions — all addressable.
+      </div>
+    </div>
+  `;
+})();
 </script>
 </body></html>
