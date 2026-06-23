@@ -9,7 +9,7 @@
   .kpi { background: #fff; border-radius: 8px; padding: 14px 18px; min-width: 130px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
   .kpi .val { font-size: 24px; font-weight: 700; line-height: 1; }
   .kpi .lbl { font-size: 11px; color: #6b778c; margin-top: 3px; }
-  .kpi.hw .val { color: #de350b; }
+  .kpi.hw .val { color: #FF991F; }
   .kpi.sw .val { color: #0052cc; }
   .kpi.bots .val { color: #6554c0; }
   .kpi.total .val { color: #172b4d; }
@@ -39,7 +39,6 @@
 <div class="kpi-row">
   <div class="kpi hw"><div class="val" id="kpi-hw-latest">—</div><div class="lbl">HW tickets / 1k bots (latest wk)</div></div>
   <div class="kpi sw"><div class="val" id="kpi-sw-latest">—</div><div class="lbl">SW tickets / 1k bots (latest wk)</div></div>
-  <div class="kpi bots"><div class="val" id="kpi-bots">—</div><div class="lbl">Active bots (latest wk) — shipped &amp; not returned</div></div>
   <div class="kpi total"><div class="val" id="kpi-total-tickets">—</div><div class="lbl">Total tickets in period</div></div>
 </div>
 
@@ -47,9 +46,8 @@
   <div class="card-title">Tickets per 1,000 Active Bots — Weekly</div>
   <div class="card-sub">Lower is better. <b>Active bots</b> = shipped hostnames (Shopify) with a heartbeat in the last 14 days as of week end, after their ship date, excluding robots returned per OMS. Source: Octopus DB — closest available approximation to the Grafana definition.</div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#de350b;height:3px;width:24px;"></div><span>HW tickets / 1k bots</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FF991F;height:3px;width:24px;"></div><span>HW tickets / 1k bots</span></div>
     <div class="legend-item"><div class="legend-dot" style="background:#0052cc;height:3px;width:24px;"></div><span>SW tickets / 1k bots</span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:#dfe1e6;height:12px;width:12px;border-radius:2px;"></div><span>Active bots (right axis)</span></div>
   </div>
   <svg id="chart" width="100%" style="display:block;overflow:visible;"></svg>
   <div class="anomaly-note">⚠ Week of Oct 23 excluded — heartbeat data shows only 244 active bots (likely a data gap), which would produce a spurious spike.</div>
@@ -60,7 +58,7 @@
   <div class="card-title">Raw Ticket Volume — Weekly</div>
   <div class="card-sub">Absolute HW and SW bug ticket counts (not normalized).</div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#de350b;height:12px;width:12px;border-radius:2px;"></div><span>HW tickets</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FF991F;height:12px;width:12px;border-radius:2px;"></div><span>HW tickets</span></div>
     <div class="legend-item"><div class="legend-dot" style="background:#0052cc;height:12px;width:12px;border-radius:2px;"></div><span>SW tickets</span></div>
   </div>
   <svg id="bar-chart" width="100%" style="display:block;overflow:visible;"></svg>
@@ -112,7 +110,6 @@ const RAW = [
 const last = RAW[RAW.length-1];
 document.getElementById('kpi-hw-latest').textContent = last.hw1k.toFixed(1);
 document.getElementById('kpi-sw-latest').textContent = last.sw1k.toFixed(1);
-document.getElementById('kpi-bots').textContent = last.bots.toLocaleString();
 const totalTickets = RAW.reduce((s,d)=>s+d.hw+d.sw,0);
 document.getElementById('kpi-total-tickets').textContent = totalTickets.toLocaleString();
 
@@ -141,12 +138,7 @@ function drawLineChart() {
     parent.appendChild(e); return e;
   };
 
-  // Bot count bars (background)
-  RAW.forEach((d,i) => {
-    const bh = ih - (yBots(d.bots) - pad.top);
-    el('rect', {x: xScale(i)-5, y: yBots(d.bots), width:10, height: bh,
-      fill:'#dfe1e6', opacity:0.5, rx:2});
-  });
+  // Bot count bars hidden (active bot count under review)
 
   // Grid lines
   for (let v=0; v<=maxRate; v+=5) {
@@ -156,13 +148,7 @@ function drawLineChart() {
       'font-size':10, fill:'#97a0af'}).textContent = v;
   }
 
-  // Right axis labels (bots)
-  [0, 2000, 4000, 6000, 8000].forEach(v => {
-    if (v <= maxBots*1.1) {
-      el('text', {x:pad.left+iw+4, y:yBots(v)+4, 'text-anchor':'start',
-        'font-size':9, fill:'#b3bac5'}).textContent = (v/1000)+'k';
-    }
-  });
+  // Right axis (bots) hidden
 
   // X axis labels (every 4 weeks)
   RAW.forEach((d,i) => {
@@ -181,14 +167,14 @@ function drawLineChart() {
     const pts = RAW.map((d,i) => `${i===0?'M':'L'}${xScale(i).toFixed(1)},${yScale(d[key]).toFixed(1)}`).join(' ');
     el('path', {d:pts, fill:'none', stroke:color, 'stroke-width':2.5, 'stroke-linejoin':'round'});
   };
-  linePath('hw1k','#de350b');
+  linePath('hw1k','#FF991F');
   linePath('sw1k','#0052cc');
 
   // Dots + hover targets
   const tooltip = document.getElementById('tooltip');
   RAW.forEach((d,i) => {
     ['hw1k','sw1k'].forEach(key => {
-      const color = key==='hw1k'?'#de350b':'#0052cc';
+      const color = key==='hw1k'?'#FF991F':'#0052cc';
       const dot = el('circle', {cx:xScale(i), cy:yScale(d[key]), r:3.5,
         fill:color, stroke:'#fff', 'stroke-width':1.5});
     });
@@ -201,9 +187,8 @@ function drawLineChart() {
       tooltip.style.top  = (e.clientY-8)+'px';
       tooltip.innerHTML =
         `<b>${d.w}</b><br>` +
-        `🔴 HW: ${d.hw1k.toFixed(1)} / 1k bots (${d.hw} tickets)<br>` +
-        `🔵 SW: ${d.sw1k.toFixed(1)} / 1k bots (${d.sw} tickets)<br>` +
-        `🤖 Active bots: ${d.bots.toLocaleString()}`;
+        `🟠 HW: ${d.hw1k.toFixed(1)} / 1k bots (${d.hw} tickets)<br>` +
+        `🔵 SW: ${d.sw1k.toFixed(1)} / 1k bots (${d.sw} tickets)`;
     });
     rect.addEventListener('mouseleave', () => tooltip.style.display = 'none');
   });
@@ -256,7 +241,7 @@ function drawBarChart() {
     const swH = ih * d.sw / (maxTotal*1.1);
 
     el('rect', {x:cx, y:yScale(d.hw+d.sw), width:bw, height:swH, fill:'#4c9aff', rx:2});
-    el('rect', {x:cx, y:yScale(d.hw), width:bw, height:hwH, fill:'#de350b', rx:2});
+    el('rect', {x:cx, y:yScale(d.hw), width:bw, height:hwH, fill:'#FF991F', rx:2});
 
     if (i % 4 === 0 || i === n-1) {
       el('text', {x:cx+bw/2, y:pad.top+ih+14, 'text-anchor':'middle',
@@ -268,7 +253,7 @@ function drawBarChart() {
       tooltip.style.display = 'block';
       tooltip.style.left = (e.clientX+14)+'px';
       tooltip.style.top  = (e.clientY-8)+'px';
-      tooltip.innerHTML = `<b>${d.w}</b><br>🔴 HW: ${d.hw}<br>🔵 SW: ${d.sw}<br>Total: ${d.hw+d.sw}`;
+      tooltip.innerHTML = `<b>${d.w}</b><br>🟠 HW: ${d.hw}<br>🔵 SW: ${d.sw}<br>Total: ${d.hw+d.sw}`;
     });
     rect.addEventListener('mouseleave', () => tooltip.style.display = 'none');
   });
