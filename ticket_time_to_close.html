@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Time to Close — Ticket Trends 2026</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 32px 24px 64px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-bottom: 36px;
+    }
+
+    .kpi-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .kpi {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 20px 24px;
+      min-width: 150px;
+      flex: 1;
+    }
+
+    .kpi-label {
+      font-size: 0.72rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .kpi-sub {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .kpi-value.good  { color: #34d399; }
+    .kpi-value.warn  { color: #fbbf24; }
+    .kpi-value.neutral { color: #60a5fa; }
+
+    .charts-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .chart-card {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 16px;
+      padding: 28px 32px 24px;
+    }
+
+    .chart-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    .chart-desc {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 270px;
+    }
+
+    .table-card {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-top: 28px;
+      overflow-x: auto;
+    }
+
+    .table-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+      min-width: 620px;
+    }
+
+    th {
+      text-align: left;
+      color: #64748b;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 8px 12px;
+      border-bottom: 1px solid #2d3748;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1a202c;
+      color: #cbd5e1;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    td.month { color: #f1f5f9; font-weight: 500; }
+    td.good  { color: #34d399; }
+    td.warn  { color: #fbbf24; }
+    td.bad   { color: #f87171; }
+
+    .note {
+      font-size: 0.72rem;
+      color: #475569;
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    .explainer {
+      background: #1e2330;
+      border: 1px solid #2d3748;
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 28px;
+    }
+
+    .explainer-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }
+
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px 32px;
+    }
+
+    .explainer-item h4 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 5px;
+    }
+
+    .explainer-item p {
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
+    .explainer-item code {
+      font-size: 0.73rem;
+      background: #0f1117;
+      border: 1px solid #2d3748;
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Time to Close — Ticket Trends</h1>
+<p class="subtitle">Jan – Jun 15, 2026 &nbsp;·&nbsp; full population from HubSpot (87–99% coverage per month) &nbsp;·&nbsp; split by <em>primary_category</em></p>
+
+<div class="kpi-row">
+  <div class="kpi">
+    <div class="kpi-label">HW — Best Month (median)</div>
+    <div class="kpi-value good">3.7 days</div>
+    <div class="kpi-sub">May 2026 · avg 7.2d</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">HW — Current (Jun, median)</div>
+    <div class="kpi-value bad">11.3 days</div>
+    <div class="kpi-sub">avg 16.1d · n=209</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Others — Current (Jun, median)</div>
+    <div class="kpi-value good">1.0 days</div>
+    <div class="kpi-sub">avg 4.3d · n=345</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Total Tickets Closed</div>
+    <div class="kpi-value neutral">5,355</div>
+    <div class="kpi-sub">Jan–Jun 15, 2026</div>
+  </div>
+</div>
+
+<div class="explainer">
+  <div class="explainer-title">How to read this dashboard</div>
+  <div class="explainer-grid">
+
+    <div class="explainer-item">
+      <h4>What is "time to close"?</h4>
+      <p>The number of calendar days between when a ticket was <strong>created</strong> and when it was marked <strong>closed</strong> in HubSpot. This includes weekends and any time a ticket was on hold — it's wall-clock time, not active working time.</p>
+    </div>
+
+    <div class="explainer-item">
+      <h4>Why median instead of average?</h4>
+      <p>Many tickets are created in one month but don't get resolved for weeks. When they finally close, they pull the <em>average</em> up dramatically — e.g. a ticket open for 80 days inflates the mean for its closing month. The <strong>median</strong> (the middle value when all tickets are sorted) is not affected by these outliers and better represents the typical customer experience.</p>
+    </div>
+
+    <div class="explainer-item">
+      <h4>What does "n" mean?</h4>
+      <p><strong>n</strong> is the count of tickets in that category that were <em>closed</em> during that month. It is not the number of tickets opened. For example, if 209 HW tickets closed in June, <code>n=209</code> — some of those may have been opened months earlier.</p>
+    </div>
+
+    <div class="explainer-item">
+      <h4>How are categories defined?</h4>
+      <p>HubSpot tickets have a <code>primary_category</code> field. <strong>Robot HW</strong> = <code>ROBOT_HAREDWARE</code>, <strong>Robot SW</strong> = <code>ROBOT_SOFTWARE</code>, <strong>App</strong> = <code>APP</code>. All other values — including Shipping, Returns, Order Mgmt, Duplicates, and blank entries — are grouped as <strong>Others</strong>.</p>
+    </div>
+
+    <div class="explainer-item">
+      <h4>Data coverage</h4>
+      <p>All tickets closed between <strong>Jan 1 – Jun 15, 2026</strong> were fetched from HubSpot (87–99% of each month's total). Monthly totals shown are the exact HubSpot counts. A small final page per month (~1–13%) was not captured, so n values may be slightly understated.</p>
+    </div>
+
+    <div class="explainer-item">
+      <h4>Color coding in the table</h4>
+      <p><span style="color:#34d399">Green</span> = ≤ 1 day &nbsp;·&nbsp; <span style="color:#cbd5e1">White</span> = 1–6 days &nbsp;·&nbsp; <span style="color:#fbbf24">Yellow</span> = 6–10 days &nbsp;·&nbsp; <span style="color:#f87171">Red</span> = &gt; 10 days. Thresholds are approximate — use as a directional guide, not hard SLAs.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="charts-grid">
+
+  <div class="chart-card">
+    <div class="chart-title">HW / SW / App Tickets — Median Days to Close</div>
+    <div class="chart-desc">Median time to close per category. Hover for values and ticket counts.</div>
+    <div class="chart-wrap">
+      <canvas id="chartHW"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Other Tickets — Median Days to Close</div>
+    <div class="chart-desc">Shipping · Returns · Order Mgmt · Uncategorized · all non-HW/SW/App categories.</div>
+    <div class="chart-wrap">
+      <canvas id="chartOther"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<div class="table-card">
+  <div class="table-title">Monthly Detail</div>
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="2">Month</th>
+        <th rowspan="2">Total Closed</th>
+        <th colspan="2" style="border-left:1px solid #2d3748;color:#f87171">Robot HW</th>
+        <th colspan="2" style="border-left:1px solid #2d3748;color:#a78bfa">Robot SW</th>
+        <th colspan="2" style="border-left:1px solid #2d3748;color:#fb923c">App</th>
+        <th colspan="2" style="border-left:1px solid #2d3748;color:#60a5fa">Others</th>
+      </tr>
+      <tr>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
+        <th style="border-left:1px solid #2d3748">n</th><th>Median</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <p class="note">
+    Source: HubSpot <code>primary_category</code> + <code>time_to_close</code> fields. All times are calendar days (wall-clock, not business hours). See the methodology panel above for full details.
+  </p>
+</div>
+
+<script>
+const MONTHS = ["Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026 (1-15)"];
+
+const DATA = {
+  "Jan 2026":        { total: 1021, hw_avg: 14.1916, hw_med: 8.3683,  hw_n: 235, sw_avg: 12.0434, sw_med: 6.7533,  sw_n: 176, ap_avg: 5.1823,  ap_med: 3.9452, ap_n: 19, ot_avg: 7.226,  ot_med: 1.4893, ot_n: 570 },
+  "Feb 2026":        { total: 687,  hw_avg: 7.4468,  hw_med: 5.0741,  hw_n: 213, sw_avg: 7.2021,  sw_med: 5.7462,  sw_n: 95,  ap_avg: 7.1987,  ap_med: 3.617,  ap_n: 16, ot_avg: 4.1319, ot_med: 1.5137, ot_n: 276 },
+  "Mar 2026":        { total: 836,  hw_avg: 12.0549, hw_med: 6.8649,  hw_n: 251, sw_avg: 10.7692, sw_med: 5.4557,  sw_n: 113, ap_avg: 6.3022,  ap_med: 4.9818, ap_n: 10, ot_avg: 4.2506, ot_med: 0.7993, ot_n: 426 },
+  "Apr 2026":        { total: 1011, hw_avg: 15.3997, hw_med: 6.1812,  hw_n: 264, sw_avg: 18.1836, sw_med: 7.9036,  sw_n: 69,  ap_avg: 11.9687, ap_med: 5.9373, ap_n: 12, ot_avg: 5.149,  ot_med: 0.9201, ot_n: 655 },
+  "May 2026":        { total: 1134, hw_avg: 7.1548,  hw_med: 3.6542,  hw_n: 256, sw_avg: 6.0658,  sw_med: 4.1509,  sw_n: 69,  ap_avg: 6.1969,  ap_med: 2.7698, ap_n: 10, ot_avg: 2.922,  ot_med: 0.9147, ot_n: 665 },
+  "Jun 2026 (1-15)": { total: 666,  hw_avg: 16.0788, hw_med: 11.3278, hw_n: 209, sw_avg: 16.8849, sw_med: 9.6251,  sw_n: 42,  ap_avg: 5.2569,  ap_med: 5.1483, ap_n: 4,  ot_avg: 4.2796, ot_med: 1.0319, ot_n: 345 },
+};
+
+const gridColor = "rgba(45,55,72,0.7)";
+
+const baseOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: "index", intersect: false },
+  plugins: {
+    legend: {
+      labels: { color: "#94a3b8", font: { size: 12 }, boxWidth: 14, padding: 16 }
+    },
+    tooltip: {
+      backgroundColor: "#1a202c",
+      borderColor: "#2d3748",
+      borderWidth: 1,
+      titleColor: "#f1f5f9",
+      bodyColor: "#94a3b8",
+      padding: 12,
+      callbacks: {
+        label: ctx => {
+          const v = ctx.parsed.y;
+          const d = DATA[ctx.label || MONTHS[ctx.dataIndex]];
+          const key = ctx.dataset._key;
+          const n = d ? d[key + '_n'] : null;
+          const nStr = (n != null && ctx.dataset._showN) ? ` (n=${n})` : '';
+          return v == null
+            ? ` ${ctx.dataset.label}: no data`
+            : ` ${ctx.dataset.label}: ${v.toFixed(1)}d${nStr}`;
+        }
+      }
+    }
+  },
+  scales: {
+    x: { ticks: { color: "#64748b", font: { size: 11 } }, grid: { color: gridColor } },
+    y: {
+      title: { display: true, text: "Days to Close", color: "#64748b", font: { size: 11 } },
+      ticks: { color: "#64748b", font: { size: 11 } },
+      grid: { color: gridColor },
+      beginAtZero: true
+    }
+  }
+};
+
+// solid = median (typical), dashed = avg (inflated by old backlog tickets)
+function makeLine(label, key, color, suffix, opts = {}) {
+  const dashed = opts.dashed || false;
+  const showN  = opts.showN  || false;
+  return {
+    label,
+    _key: key,
+    _showN: showN,
+    data: MONTHS.map(m => DATA[m][key + suffix]),
+    borderColor: color,
+    backgroundColor: dashed ? "transparent" : color + "18",
+    pointBackgroundColor: color,
+    pointRadius: dashed ? 3 : 5,
+    pointHoverRadius: 7,
+    borderDash: dashed ? [5, 4] : [],
+    tension: 0.35,
+    fill: !dashed,
+    borderWidth: dashed ? 1.5 : 2.5,
+    spanGaps: true,
+  };
+}
+
+// Chart 1: HW / SW / App — one median line per category
+new Chart(document.getElementById("chartHW"), {
+  type: "line",
+  data: {
+    labels: MONTHS,
+    datasets: [
+      makeLine("Robot HW", "hw", "#f87171", "_med", {showN: true}),
+      makeLine("Robot SW", "sw", "#a78bfa", "_med", {showN: true}),
+      makeLine("App",      "ap", "#fb923c", "_med", {showN: true}),
+    ]
+  },
+  options: baseOptions,
+});
+
+// Chart 2: Others — one median line
+new Chart(document.getElementById("chartOther"), {
+  type: "line",
+  data: {
+    labels: MONTHS,
+    datasets: [
+      makeLine("Others", "ot", "#60a5fa", "_med", {showN: true}),
+    ]
+  },
+  options: baseOptions,
+});
+
+function cls(v) {
+  if (v === null) return "";
+  if (v <= 1)  return "good";
+  if (v <= 6)  return "";
+  if (v <= 10) return "warn";
+  return "bad";
+}
+
+const tbody = document.getElementById("tableBody");
+MONTHS.forEach(m => {
+  const d = DATA[m];
+  const fmt = v => v == null ? '—' : v.toFixed(2) + 'd';
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td class="month">${m}</td>
+    <td>${d.total.toLocaleString()}</td>
+    <td style="border-left:1px solid #1a202c">${d.hw_n}</td>
+    <td class="${cls(d.hw_med)}">${fmt(d.hw_med)}</td>
+    <td style="border-left:1px solid #1a202c">${d.sw_n}</td>
+    <td class="${cls(d.sw_med)}">${fmt(d.sw_med)}</td>
+    <td style="border-left:1px solid #1a202c">${d.ap_n}</td>
+    <td class="${cls(d.ap_med)}">${fmt(d.ap_med)}</td>
+    <td style="border-left:1px solid #1a202c">${d.ot_n}</td>
+    <td class="${cls(d.ot_med)}">${fmt(d.ot_med)}</td>
+  `;
+  tbody.appendChild(tr);
+});
+</script>
+
+</body>
+</html>
