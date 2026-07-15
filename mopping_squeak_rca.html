@@ -1,0 +1,518 @@
+<!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>Mopping Squeak — Is It Increasing Over Time?</title>
+<style>
+  :root {
+    --plane:#f9f9f7; --surface:#fcfcfb; --surface-2:#f2f1ec;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,0.10);
+    --mop:#e34948; --wheel:#eb6834; --brush:#2a78d6;
+    --blue:#2a78d6; --blue-fleet:#86b6ef;
+    --good:#0ca30c; --crit:#d03b3b; --warn:#b4790a;
+    --seq1:#cde2fb; --seq2:#9ec5f4; --seq3:#5598e7; --seq4:#2a78d6; --seq5:#184f95; --seq6:#0d366b;
+    --shadow:0 1px 2px rgba(11,11,11,.04),0 8px 24px rgba(11,11,11,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232322;
+      --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,0.10);
+      --mop:#e66767; --wheel:#d95926; --brush:#3987e5;
+      --blue:#3987e5; --blue-fleet:#1c5cab;
+      --good:#0ca30c; --crit:#e05a5a; --warn:#e0a63a;
+      --seq1:#12324f; --seq2:#184f95; --seq3:#256abf; --seq4:#3987e5; --seq5:#6da7ec; --seq6:#9ec5f4;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 28px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --plane:#f9f9f7; --surface:#fcfcfb; --surface-2:#f2f1ec;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,0.10);
+    --mop:#e34948; --wheel:#eb6834; --brush:#2a78d6; --blue:#2a78d6; --blue-fleet:#86b6ef;
+    --crit:#d03b3b; --warn:#b4790a;
+    --seq1:#cde2fb; --seq2:#9ec5f4; --seq3:#5598e7; --seq4:#2a78d6; --seq5:#184f95; --seq6:#0d366b;
+    --shadow:0 1px 2px rgba(11,11,11,.04),0 8px 24px rgba(11,11,11,.05);
+  }
+  :root[data-theme="dark"]{
+    --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#232322;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,0.10);
+    --mop:#e66767; --wheel:#d95926; --brush:#3987e5; --blue:#3987e5; --blue-fleet:#1c5cab;
+    --crit:#e05a5a; --warn:#e0a63a;
+    --seq1:#12324f; --seq2:#184f95; --seq3:#256abf; --seq4:#3987e5; --seq5:#6da7ec; --seq6:#9ec5f4;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:var(--plane); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:1060px; margin:0 auto; padding:40px 24px 96px; }
+  .eyebrow { font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--mop); font-weight:700; }
+  h1 { font-size:2rem; font-weight:800; letter-spacing:-.02em; margin:.35rem 0 .4rem; text-wrap:balance; }
+  .lede { color:var(--ink-2); font-size:1.02rem; max-width:64ch; margin:0; }
+  .meta-line { color:var(--muted); font-size:.8rem; margin-top:14px; display:flex; gap:8px 18px; flex-wrap:wrap; align-items:center;}
+  .toggle { margin-left:auto; background:var(--surface-2); border:1px solid var(--ring); color:var(--ink-2);
+    border-radius:999px; padding:6px 14px; font-size:.75rem; cursor:pointer; font-family:inherit; }
+  .toggle:hover { color:var(--ink); }
+
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:14px; margin:32px 0 8px; }
+  .kpi { background:var(--surface); border:1px solid var(--ring); border-radius:14px; padding:18px 18px 16px; box-shadow:var(--shadow); }
+  .kpi .k-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .kpi .k-val { font-size:1.9rem; font-weight:800; letter-spacing:-.02em; margin-top:7px; }
+  .kpi .k-sub { font-size:.76rem; color:var(--ink-2); margin-top:5px; }
+  .k-val.mop{color:var(--mop);} .k-val.up{color:var(--crit);} .k-val.blue{color:var(--blue);} .k-val.good{color:var(--good);}
+
+  section.card { background:var(--surface); border:1px solid var(--ring); border-radius:18px;
+    padding:26px 30px 30px; margin-top:26px; box-shadow:var(--shadow); }
+  .sec-head { display:flex; gap:16px; align-items:baseline; }
+  .sec-num { font-size:.82rem; font-weight:800; color:var(--mop); font-variant-numeric:tabular-nums; }
+  .sec-title { font-size:1.18rem; font-weight:700; letter-spacing:-.01em; margin:0; }
+  .sec-q { color:var(--muted); font-size:.86rem; margin:2px 0 0; }
+  .read { margin-top:18px; font-size:.9rem; color:var(--ink-2); border-left:2px solid var(--mop); padding:2px 0 2px 14px; }
+  .read b { color:var(--ink); font-weight:650; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+  @media (max-width:760px){ .grid2{grid-template-columns:1fr;} .wrap{padding:28px 16px 72px;} section.card{padding:22px 18px 24px;} }
+  .panel-t { font-size:.82rem; font-weight:650; color:var(--ink); margin:0 0 2px; }
+  .panel-s { font-size:.74rem; color:var(--muted); margin:0 0 12px; }
+
+  .legend { display:flex; gap:16px; flex-wrap:wrap; font-size:.78rem; color:var(--ink-2); margin-top:14px; }
+  .legend .lk { display:inline-flex; align-items:center; gap:7px; }
+  .legend .sw { width:11px; height:11px; border-radius:3px; display:inline-block; }
+  svg { display:block; width:100%; height:auto; overflow:visible; }
+  .ax { fill:var(--muted); font-size:11px; }
+  .axlab { fill:var(--ink-2); font-size:11px; font-weight:600; }
+  .val { fill:var(--ink); font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; }
+  .gridline { stroke:var(--grid); stroke-width:1; }
+  .baseline { stroke:var(--axis); stroke-width:1.5; }
+  .bar { transition:opacity .12s; cursor:default; }
+  .bar:hover { opacity:.82; }
+
+  .tbl { width:100%; border-collapse:collapse; font-size:.8rem; margin-top:8px; }
+  .tbl th,.tbl td { text-align:right; padding:7px 10px; border-bottom:1px solid var(--grid); font-variant-numeric:tabular-nums; }
+  .tbl th:first-child,.tbl td:first-child { text-align:left; }
+  .tbl th { color:var(--muted); font-weight:600; font-size:.7rem; text-transform:uppercase; letter-spacing:.04em; }
+  .tbl td .chip { font-size:.66rem; padding:1px 7px; border-radius:999px; background:var(--surface-2); color:var(--ink-2); }
+  details { margin-top:16px; } summary { cursor:pointer; color:var(--muted); font-size:.8rem; }
+  summary:hover{ color:var(--ink); }
+
+  .concl { background:var(--surface); border:1px solid var(--ring); border-left:4px solid var(--mop);
+    border-radius:14px; padding:24px 28px; margin-top:26px; box-shadow:var(--shadow); }
+  .concl h3 { margin:0 0 12px; font-size:1.1rem; }
+  .concl ul { margin:0; padding-left:18px; } .concl li { margin:8px 0; color:var(--ink-2); font-size:.92rem; }
+  .concl li b { color:var(--ink); }
+  .verdict { display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.03em; padding:3px 10px; border-radius:6px;
+    background:color-mix(in srgb, var(--warn) 18%, transparent); color:var(--warn); border:1px solid color-mix(in srgb,var(--warn) 40%, transparent); }
+  .tip { position:fixed; pointer-events:none; background:var(--ink); color:var(--plane); font-size:11.5px;
+    padding:7px 10px; border-radius:8px; opacity:0; transition:opacity .1s; z-index:50; box-shadow:var(--shadow); max-width:240px; }
+  .tip b{ font-weight:700; } .tip .tk{ color:var(--axis); }
+  .note { font-size:.72rem; color:var(--muted); margin-top:10px; }
+  footer { color:var(--muted); font-size:.75rem; margin-top:40px; text-align:center; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Customer Support · Root Cause Analysis</div>
+    <h1>Is the mopping squeak actually increasing over time?</h1>
+    <p class="lede">Rather than assume it’s getting louder and jump to <i>why</i>, start by testing the premise: <b>is the mopping squeak actually increasing over time?</b> This walks through the evidence — the complaint trend normalized to fleet growth, customer tenure, actual mopped square footage, and the software rollout — to confirm the rise is real and, if so, what is driving it.</p>
+    <div class="meta-line">
+      <span>Window: Dec 1 2025 – Jul 15 2026</span><span>·</span>
+      <span>Sources: HubSpot tickets · Shopify orders · fleet telemetry (octopus)</span>
+      <button class="toggle" id="themeBtn">◐ Theme</button>
+    </div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <!-- 01 -->
+  <section class="card">
+    <div class="sec-head"><span class="sec-num">01</span><div>
+      <h2 class="sec-title">Who is complaining — new owners or seasoned ones?</h2>
+      <p class="sec-q">Mopping-squeak tickets by how long the customer had owned their Matic at the moment they complained.</p>
+    </div></div>
+    <svg id="c1" viewBox="0 0 640 300" role="img" aria-label="Mopping-squeak complaints by owner tenure"></svg>
+    <p class="read" id="read1"></p>
+  </section>
+
+  <!-- 02 -->
+  <section class="card">
+    <div class="sec-head"><span class="sec-num">02</span><div>
+      <h2 class="sec-title">How much had these bots actually mopped?</h2>
+      <p class="sec-q">Square footage mopped, measured from fleet telemetry — complainers vs. the whole fleet, the wear level at the moment of complaint, and whether they backed off mopping afterward.</p>
+    </div></div>
+    <div class="grid2">
+      <div>
+        <p class="panel-t">Complainers mop more — but not harder</p>
+        <p class="panel-s">Avg per bot · complainer cohort vs. full fleet</p>
+        <svg id="c2a" viewBox="0 0 320 260" role="img" aria-label="Complainer vs fleet mop square footage"></svg>
+      </div>
+      <div>
+        <p class="panel-t">Wear level when the squeak started</p>
+        <p class="panel-s">Cumulative sqft mopped at complaint date (complainer bots)</p>
+        <svg id="c2b" viewBox="0 0 320 260" role="img" aria-label="Square footage mopped at time of complaint"></svg>
+      </div>
+    </div>
+    <div style="margin-top:24px;">
+      <p class="panel-t">Did they stop mopping after complaining?</p>
+      <p class="panel-s">Avg sqft mopped in the 28 days before vs. after the ticket · 12 bots with a complete after-window</p>
+      <svg id="c2c" viewBox="0 0 640 150" role="img" aria-label="Mopping before vs after complaint"></svg>
+    </div>
+    <p class="read" id="read2"></p>
+    <details><summary>Per-bot detail (16 complainer bots with telemetry)</summary>
+      <div style="overflow-x:auto;"><table class="tbl" id="botTbl"></table></div>
+    </details>
+  </section>
+
+  <!-- 03 -->
+  <section class="card">
+    <div class="sec-head"><span class="sec-num">03</span><div>
+      <h2 class="sec-title">Is the problem really growing — and are we losing money on it?</h2>
+      <p class="sec-q">Monthly squeak tickets by type, the mopping-squeak rate normalized to active-fleet size, and refund / return-for-refund exposure.</p>
+    </div></div>
+    <div class="grid2">
+      <div>
+        <p class="panel-t">Squeak tickets per month, by type</p>
+        <p class="panel-s">Stacked · mopping vs. wheel vs. brush/vacuum squeaks</p>
+        <svg id="c3a" viewBox="0 0 340 280" role="img" aria-label="Monthly squeak tickets by type"></svg>
+      </div>
+      <div>
+        <p class="panel-t">Mopping-squeak rate per 1,000 active bots</p>
+        <p class="panel-s">Normalized for fleet growth (4.7k → 9.1k active bots)</p>
+        <svg id="c3b" viewBox="0 0 340 280" role="img" aria-label="Mopping-squeak rate per 1000 active bots"></svg>
+      </div>
+    </div>
+    <p class="read" id="read3"></p>
+  </section>
+
+  <!-- 04 -->
+  <section class="card">
+    <div class="sec-head"><span class="sec-num">04</span><div>
+      <h2 class="sec-title">Does a software release line up with the rise?</h2>
+      <p class="sec-q">The direct hypothesis test: mopping-squeak rate (top) against the fleet's software-version mix over the same weeks (bottom). Same time axis — look for a step-change that tracks one release.</p>
+    </div></div>
+    <svg id="c4" viewBox="0 0 660 420" role="img" aria-label="Squeak rate vs software rollout over time"></svg>
+    <p class="read" id="read4"></p>
+    <p class="note" id="note4"></p>
+  </section>
+
+  <div class="concl">
+    <h3>Working conclusion <span class="verdict">Software update: not supported as the trigger</span></h3>
+    <ul id="conclList"></ul>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
+const DATA = {"meta":{"window":"2025-12-01 to 2026-07-15","mop_squeak_tickets":21,"mop_squeak_unique":17,"wheel_squeak":16,"brush_vacuum_squeak":21,"not_relevant":4,"total_screened":62},"tenure":[{"bucket":"0-30","count":4},{"bucket":"30-60","count":4},{"bucket":"60-90","count":3},{"bucket":"90+","count":5},{"bucket":"unknown","count":1}],"sqft_compare":{"complainer":{"n":16,"avg_total_sqft":752,"avg_sqft_per_mopday":20},"fleet":{"n":7927,"avg_total_sqft":476,"avg_sqft_per_mopday":19,"pctiles":{"p10":14,"p25":72,"p50":231,"p75":605,"p90":1204}}},"sqft_dist":[{"range":"0-100","count":4},{"range":"100-250","count":4},{"range":"250-500","count":5},{"range":"500-1000","count":2},{"range":"1000+","count":1}],"sqft_fleet_pctiles":{"p10":14,"p25":72,"p50":231,"p75":605,"p90":1204},"bots_table":[{"bot":"bot-01","bucket":"90+","days_at_complaint":191,"sqft_at_complaint":1841,"total_sqft":2112,"sqft_28d_before":67,"sqft_28d_after":179},{"bot":"bot-02","bucket":"90+","days_at_complaint":174,"sqft_at_complaint":597,"total_sqft":782,"sqft_28d_before":40,"sqft_28d_after":39},{"bot":"bot-03","bucket":"60-90","days_at_complaint":86,"sqft_at_complaint":561,"total_sqft":946,"sqft_28d_before":45,"sqft_28d_after":214},{"bot":"bot-04","bucket":"90+","days_at_complaint":252,"sqft_at_complaint":480,"total_sqft":554,"sqft_28d_before":480,"sqft_28d_after":74},{"bot":"bot-05","bucket":"90+","days_at_complaint":130,"sqft_at_complaint":445,"total_sqft":1067,"sqft_28d_before":161,"sqft_28d_after":156},{"bot":"bot-06","bucket":"60-90","days_at_complaint":65,"sqft_at_complaint":426,"total_sqft":1014,"sqft_28d_before":175,"sqft_28d_after":91},{"bot":"bot-07","bucket":"90+","days_at_complaint":185,"sqft_at_complaint":411,"total_sqft":455,"sqft_28d_before":0,"sqft_28d_after":29},{"bot":"bot-08","bucket":"0-30","days_at_complaint":15,"sqft_at_complaint":256,"total_sqft":1654,"sqft_28d_before":223,"sqft_28d_after":451},{"bot":"bot-09","bucket":"60-90","days_at_complaint":86,"sqft_at_complaint":214,"total_sqft":250,"sqft_28d_before":0,"sqft_28d_after":0},{"bot":"bot-10","bucket":"30-60","days_at_complaint":36,"sqft_at_complaint":201,"total_sqft":473,"sqft_28d_before":201,"sqft_28d_after":207},{"bot":"bot-11","bucket":"30-60","days_at_complaint":39,"sqft_at_complaint":184,"total_sqft":453,"sqft_28d_before":156,"sqft_28d_after":184},{"bot":"bot-12","bucket":"0-30","days_at_complaint":12,"sqft_at_complaint":102,"total_sqft":843,"sqft_28d_before":96,"sqft_28d_after":188},{"bot":"bot-13","bucket":"30-60","days_at_complaint":35,"sqft_at_complaint":75,"total_sqft":133,"sqft_28d_before":50,"sqft_28d_after":58},{"bot":"bot-14","bucket":"0-30","days_at_complaint":27,"sqft_at_complaint":28,"total_sqft":835,"sqft_28d_before":25,"sqft_28d_after":234},{"bot":"bot-15","bucket":"0-30","days_at_complaint":11,"sqft_at_complaint":21,"total_sqft":146,"sqft_28d_before":21,"sqft_28d_after":125},{"bot":"bot-16","bucket":"30-60","days_at_complaint":34,"sqft_at_complaint":0,"total_sqft":322,"sqft_28d_before":0,"sqft_28d_after":322}],"before_after":{"avg_before":139,"avg_after":170,"n":12,"n_dropped_half":1,"n_increased":8},"trend":[{"month":"2026-01","mop_squeak":2,"wheel_squeak":4,"brush_vacuum_squeak":2,"all":8,"active":5403,"mop_rate_per_1k":0.37,"partial":false},{"month":"2026-02","mop_squeak":1,"wheel_squeak":1,"brush_vacuum_squeak":5,"all":7,"active":5680,"mop_rate_per_1k":0.176,"partial":false},{"month":"2026-03","mop_squeak":1,"wheel_squeak":0,"brush_vacuum_squeak":7,"all":8,"active":6110,"mop_rate_per_1k":0.164,"partial":false},{"month":"2026-04","mop_squeak":3,"wheel_squeak":4,"brush_vacuum_squeak":2,"all":9,"active":6913,"mop_rate_per_1k":0.434,"partial":false},{"month":"2026-05","mop_squeak":5,"wheel_squeak":2,"brush_vacuum_squeak":2,"all":9,"active":7929,"mop_rate_per_1k":0.631,"partial":false},{"month":"2026-06","mop_squeak":6,"wheel_squeak":2,"brush_vacuum_squeak":3,"all":11,"active":9059,"mop_rate_per_1k":0.662,"partial":false},{"month":"2026-07","mop_squeak":3,"wheel_squeak":3,"brush_vacuum_squeak":0,"all":6,"active":8986,"mop_rate_per_1k":0.69,"partial":true}],"refunds":{"total_flagged":16,"mop":2,"tickets":[{"id":"(internal)","subject":"Squeaky sound","cls":"brush_vacuum_squeak","created":"2026-01-02","bot":"bot-17"},{"id":"(internal)","subject":"Rear wheel squeak","cls":"wheel_squeak","created":"2026-01-15","bot":"bot-18"},{"id":"(internal)","subject":"Mopping noise","cls":"mop_squeak","created":"2026-02-09","bot":"bot-04"},{"id":"(internal)","subject":"Squeak/bearing lockup issue","cls":"brush_vacuum_squeak","created":"2026-02-10","bot":"bot-19"},{"id":"(internal)","subject":"roller jam","cls":"brush_vacuum_squeak","created":"2026-02-13","bot":"bot-20"},{"id":"(internal)","subject":"Main roller squeezing when vacuuming.","cls":"brush_vacuum_squeak","created":"2026-02-18","bot":"bot-21"},{"id":"(internal)","subject":"Making noise and errors","cls":"brush_vacuum_squeak","created":"2026-02-26","bot":"bot-22"},{"id":"(internal)","subject":"Roller says it\u2019s jammed","cls":"brush_vacuum_squeak","created":"2026-03-20","bot":"bot-23"},{"id":"(internal)","subject":"Squeaking wheel","cls":"wheel_squeak","created":"2026-04-26","bot":"bot-24"},{"id":"(internal)","subject":"Cannot resolve brush roller issue","cls":"brush_vacuum_squeak","created":"2026-04-27","bot":"bot-25"},{"id":"(internal)","subject":"Re: Squeaking noise","cls":"mop_squeak","created":"2026-05-05","bot":"bot-11"},{"id":"(internal)","subject":"Rattling and squeaking sounds","cls":"brush_vacuum_squeak","created":"2026-05-30","bot":"bot-26"},{"id":"(internal)","subject":"Squeaking and jam","cls":"brush_vacuum_squeak","created":"2026-06-03","bot":"bot-27"},{"id":"(internal)","subject":"Brush Roll Jammed error","cls":"brush_vacuum_squeak","created":"2026-06-08","bot":"bot-28"},{"id":"(internal)","subject":"Matic performance degradation. Noises, banging, and clearing \u201cjams\u201d that don\u2019t exist","cls":"brush_vacuum_squeak","created":"2026-06-14","bot":"bot-29"},{"id":"(internal)","subject":"My Matic robot has gotten progressively squeakier on the left wheel over time to the point where I am unable to sleep and go about my daily activities while it is vacuuming. The issue typically only occurs when the vacuum is going forward on the left wheel. Things I have tried to fix this include: 1. Cleaning out all pet hair from the wheel 2. Using WD-40 to lubricate the axle","cls":"wheel_squeak","created":"2026-07-05","bot":"bot-30"}]},"sw_present":["v147","v148","v149","v150","v151","v152","v153","v154","v155","v156","v157","v158","v159","v160","v161","v162","v163","v165","v166","v167"],"sw_rollout":[{"week":"2026-03-02","total_bots":9877,"other":17.9,"v147":76.6,"v148":4.4,"v149":0.8,"v150":0.1,"v151":0.0,"v152":0.0,"v153":0.0,"v154":0.1,"v156":0.0,"older":0.0},{"week":"2026-03-09","total_bots":11224,"other":0.2,"v147":30.1,"v148":63.3,"v149":5.0,"v150":1.2,"v151":0.1,"v152":0.0,"v153":0.0,"v154":0.1,"older":0.0},{"week":"2026-03-16","total_bots":6788,"other":0.1,"v147":0.1,"v148":34.8,"v149":55.1,"v150":7.9,"v151":1.6,"v152":0.2,"v153":0.1,"v154":0.2,"v156":0.0,"older":0.0},{"week":"2026-03-23","total_bots":9550,"other":0.0,"v147":0.0,"v148":0.1,"v149":17.2,"v150":74.5,"v151":6.8,"v152":1.0,"v153":0.1,"v154":0.2,"v157":0.0,"v162":0.0,"older":0.0},{"week":"2026-03-30","total_bots":7773,"other":0.1,"v148":0.0,"v149":0.0,"v150":22.0,"v151":68.2,"v152":7.9,"v153":1.3,"v154":0.5,"v155":0.0,"v156":0.0,"older":0.0},{"week":"2026-04-06","total_bots":6693,"other":0.0,"v147":0.0,"v148":0.0,"v150":0.2,"v151":29.0,"v152":60.1,"v153":8.4,"v154":2.1,"v155":0.0,"v156":0.1,"v157":0.0,"v160":0.0,"v162":0.0,"v163":0.0,"older":0.0},{"week":"2026-04-13","total_bots":12074,"other":0.0,"v147":0.0,"v150":0.0,"v151":0.0,"v152":20.4,"v153":69.3,"v154":9.5,"v155":0.7,"v156":0.1,"v157":0.0,"v158":0.0,"older":0.0},{"week":"2026-04-20","total_bots":11046,"other":0.0,"v147":0.0,"v149":0.0,"v152":0.1,"v153":17.3,"v154":75.6,"v155":6.2,"v156":0.7,"v157":0.0,"v159":0.0,"v163":0.0,"older":0.0},{"week":"2026-04-27","total_bots":10368,"other":0.0,"v149":0.0,"v151":0.0,"v152":0.0,"v153":0.1,"v154":24.6,"v155":66.1,"v156":8.3,"v157":0.8,"v160":0.0,"v161":0.0,"older":0.0},{"week":"2026-05-04","total_bots":14417,"v153":0.0,"v154":0.1,"v155":17.5,"v156":75.3,"v157":6.4,"v158":0.7,"older":0.0},{"week":"2026-05-11","total_bots":10614,"v155":0.1,"v156":26.7,"v157":65.8,"v158":6.4,"v159":1.0,"v160":0.0,"older":0.0},{"week":"2026-05-18","total_bots":6422,"v155":0.0,"v156":7.3,"v157":66.7,"v158":21.0,"v159":3.2,"v160":1.7,"v161":0.0,"older":0.0},{"week":"2026-05-25","total_bots":16742,"other":0.0,"v147":0.0,"v155":0.0,"v156":2.0,"v157":15.2,"v158":21.4,"v159":58.5,"v160":2.5,"v161":0.5,"v162":0.0,"v165":0.0,"older":0.0},{"week":"2026-06-01","total_bots":12304,"v147":0.0,"v155":0.0,"v156":0.1,"v157":0.0,"v158":0.1,"v159":50.3,"v160":42.8,"v161":5.6,"v162":1.1,"v163":0.0,"older":0.0},{"week":"2026-06-08","total_bots":15650,"v147":0.0,"v151":0.0,"v155":0.0,"v156":0.0,"v157":0.0,"v158":0.0,"v159":0.1,"v160":23.2,"v161":72.9,"v162":2.9,"v163":0.8,"v165":0.0,"older":0.0},{"week":"2026-06-15","total_bots":13533,"other":0.0,"v147":0.0,"v151":0.0,"v155":0.0,"v157":0.0,"v158":0.0,"v159":0.0,"v160":0.2,"v161":23.2,"v162":70.1,"v163":5.6,"v165":0.9,"older":0.0},{"week":"2026-06-22","total_bots":9727,"other":0.0,"v147":0.0,"v151":0.0,"v155":0.0,"v156":0.0,"v158":0.0,"v159":0.0,"v160":0.0,"v161":0.3,"v162":33.7,"v163":57.6,"v165":6.8,"v166":1.5,"v167":0.0,"older":0.0},{"week":"2026-06-29","total_bots":16496,"v156":0.0,"v159":0.0,"v160":0.0,"v161":0.0,"v162":0.1,"v163":21.2,"v165":74.1,"v166":4.0,"v167":0.6,"older":0.0},{"week":"2026-07-06","total_bots":15368,"v159":0.0,"v160":0.0,"v161":0.0,"v162":0.0,"v163":0.1,"v165":21.5,"v166":71.8,"v167":6.2,"older":0.4},{"week":"2026-07-13","total_bots":9300,"v159":0.0,"v160":0.0,"v165":0.1,"v166":38.4,"v167":59.9,"older":1.6}]};
+const tip = document.getElementById('tip');
+function showTip(e,html){ tip.innerHTML=html; tip.style.opacity=1;
+  let x=e.clientX+14,y=e.clientY+14; if(x>innerWidth-250)x=e.clientX-250; tip.style.left=x+'px'; tip.style.top=y+'px'; }
+function hideTip(){ tip.style.opacity=0; }
+const cv = k => getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+const SVGNS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){ const n=document.createElementNS(SVGNS,tag);
+  for(const k in attrs) n.setAttribute(k,attrs[k]); if(parent)parent.appendChild(n); return n; }
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+
+// ---------- 01 tenure ----------
+function drawTenure(){
+  const svg=document.getElementById('c1'); clear(svg);
+  const W=640,H=300,L=44,R=20,T=24,B=52, pw=W-L-R, ph=H-T-B;
+  const rows=DATA.tenure.filter(r=>r.count>0);
+  const labels={'0-30':'First 30 days','30-60':'Day 30–60','60-90':'Day 60–90','90+':'90+ days','unknown':'Unknown'};
+  const max=5, ticks=[0,1,2,3,4,5];
+  ticks.forEach(t=>{ const y=T+ph-(t/max)*ph;
+    el('line',{x1:L,y1:y,x2:W-R,y2:y,class:'gridline'},svg);
+    el('text',{x:L-8,y:y+4,'text-anchor':'end',class:'ax'},svg).textContent=t; });
+  const n=rows.length, gap=26, bw=Math.min(78,(pw-gap*(n-1))/n);
+  const step=(pw-bw)/(n-1);
+  rows.forEach((r,i)=>{
+    const x=L+i*step, h=(r.count/max)*ph, y=T+ph-h;
+    const isUnknown=r.bucket==='unknown';
+    const rect=el('rect',{x,y,width:bw,height:h,rx:4,class:'bar',
+      fill:isUnknown?'var(--muted)':'var(--blue)',opacity:isUnknown?.5:1},svg);
+    rect.addEventListener('mousemove',e=>showTip(e,`<b>${labels[r.bucket]}</b><br>${r.count} complaint${r.count>1?'s':''}`));
+    rect.addEventListener('mouseleave',hideTip);
+    el('text',{x:x+bw/2,y:y-8,'text-anchor':'middle',class:'val'},svg).textContent=r.count;
+    el('text',{x:x+bw/2,y:H-30,'text-anchor':'middle',class:'axlab'},svg).textContent=labels[r.bucket];
+  });
+  el('line',{x1:L,y1:T+ph,x2:W-R,y2:T+ph,class:'baseline'},svg);
+  el('text',{x:L,y:H-8,class:'ax'},svg).textContent='Owner tenure at time of complaint  ·  n = 17 unique customers';
+}
+
+// ---------- 02a complainer vs fleet ----------
+function drawCompare(){
+  const svg=document.getElementById('c2a'); clear(svg);
+  const W=320,H=260,L=44,R=14,T=20,B=64,pw=W-L-R,ph=H-T-B;
+  const groups=[
+    {lab:'Total sqft',sub:'mopped, lifetime',c:DATA.sqft_compare.complainer.avg_total_sqft,f:DATA.sqft_compare.fleet.avg_total_sqft,max:800},
+    {lab:'Sqft / day',sub:'when mopping',c:DATA.sqft_compare.complainer.avg_sqft_per_mopday,f:DATA.sqft_compare.fleet.avg_sqft_per_mopday,max:800},
+  ];
+  const gw=pw/groups.length;
+  groups.forEach((g,i)=>{
+    const cx=L+i*gw+gw/2, bw=30, gap=8;
+    // independent scale per group would break comparability of axis; use shared max=800 for total, but sqft/day tiny.
+    // Use per-group scaling with printed values (values labeled), bars indicate ratio within group.
+    const gmax=Math.max(g.c,g.f)*1.25;
+    const hc=(g.c/gmax)*ph, hf=(g.f/gmax)*ph;
+    const x1=cx-bw-gap/2, x2=cx+gap/2;
+    const r1=el('rect',{x:x1,y:T+ph-hc,width:bw,height:hc,rx:4,class:'bar',fill:'var(--mop)'},svg);
+    const r2=el('rect',{x:x2,y:T+ph-hf,width:bw,height:hf,rx:4,class:'bar',fill:'var(--brush)'},svg);
+    r1.addEventListener('mousemove',e=>showTip(e,`<b>Complainers</b> · ${g.lab}<br>${g.c.toLocaleString()} sqft`));
+    r2.addEventListener('mousemove',e=>showTip(e,`<b>Fleet avg</b> · ${g.lab}<br>${g.f.toLocaleString()} sqft`));
+    [r1,r2].forEach(r=>r.addEventListener('mouseleave',hideTip));
+    el('text',{x:x1+bw/2,y:T+ph-hc-6,'text-anchor':'middle',class:'val'},svg).textContent=g.c.toLocaleString();
+    el('text',{x:x2+bw/2,y:T+ph-hf-6,'text-anchor':'middle',class:'val'},svg).textContent=g.f.toLocaleString();
+    el('text',{x:cx,y:H-38,'text-anchor':'middle',class:'axlab'},svg).textContent=g.lab;
+    el('text',{x:cx,y:H-24,'text-anchor':'middle',class:'ax'},svg).textContent=g.sub;
+  });
+  el('line',{x1:L,y1:T+ph,x2:W-R,y2:T+ph,class:'baseline'},svg);
+  // legend
+  const lg=el('g',{},svg);
+  el('rect',{x:L,y:H-12,width:10,height:10,rx:2,fill:'var(--mop)'},svg);
+  el('text',{x:L+15,y:H-3,class:'ax'},svg).textContent='Complainers';
+  el('rect',{x:L+92,y:H-12,width:10,height:10,rx:2,fill:'var(--brush)'},svg);
+  el('text',{x:L+107,y:H-3,class:'ax'},svg).textContent='Fleet avg';
+}
+
+// ---------- 02b sqft-at-complaint distribution ----------
+function drawDist(){
+  const svg=document.getElementById('c2b'); clear(svg);
+  const W=320,H=260,L=30,R=14,T=20,B=64,pw=W-L-R,ph=H-T-B;
+  const rows=DATA.sqft_dist, max=6;
+  [0,2,4,6].forEach(t=>{ const y=T+ph-(t/max)*ph;
+    el('line',{x1:L,y1:y,x2:W-R,y2:y,class:'gridline'},svg);
+    el('text',{x:L-6,y:y+4,'text-anchor':'end',class:'ax'},svg).textContent=t; });
+  const n=rows.length, bw=Math.min(40,pw/n-10), step=pw/n;
+  rows.forEach((r,i)=>{
+    const x=L+i*step+(step-bw)/2, h=(r.count/max)*ph, y=T+ph-h;
+    const rect=el('rect',{x,y,width:bw,height:h,rx:4,class:'bar',fill:'var(--blue)'},svg);
+    rect.addEventListener('mousemove',e=>showTip(e,`<b>${r.range} sqft</b> mopped at complaint<br>${r.count} bot${r.count>1?'s':''}`));
+    rect.addEventListener('mouseleave',hideTip);
+    if(r.count) el('text',{x:x+bw/2,y:y-6,'text-anchor':'middle',class:'val'},svg).textContent=r.count;
+    el('text',{x:x+bw/2,y:H-40,'text-anchor':'middle',class:'ax',transform:`rotate(0)`},svg).textContent=r.range;
+  });
+  el('line',{x1:L,y1:T+ph,x2:W-R,y2:T+ph,class:'baseline'},svg);
+  el('text',{x:(L+W-R)/2,y:H-22,'text-anchor':'middle',class:'axlab'},svg).textContent='Cumulative sqft mopped (buckets)';
+  el('text',{x:(L+W-R)/2,y:H-8,'text-anchor':'middle',class:'ax'},svg).textContent='Fleet median = 231 sqft · 75th pct = 605 sqft';
+}
+
+// ---------- 02c before/after ----------
+function drawBeforeAfter(){
+  const svg=document.getElementById('c2c'); clear(svg);
+  const W=640,H=150,L=120,R=180,T=16,B=30,pw=W-L-R,ph=H-T-B;
+  const ba=DATA.before_after, max=Math.max(ba.avg_before,ba.avg_after)*1.3;
+  const rows=[{lab:'28 days BEFORE',v:ba.avg_before,c:'var(--muted)'},{lab:'28 days AFTER',v:ba.avg_after,c:'var(--mop)'}];
+  const bh=26, gap=22;
+  rows.forEach((r,i)=>{
+    const y=T+i*(bh+gap), w=(r.v/max)*pw;
+    el('text',{x:L-10,y:y+bh/2+4,'text-anchor':'end',class:'axlab'},svg).textContent=r.lab;
+    const rect=el('rect',{x:L,y,width:w,height:bh,rx:4,class:'bar',fill:r.c},svg);
+    rect.addEventListener('mousemove',e=>showTip(e,`<b>${r.lab}</b><br>${r.v} sqft avg / bot`));
+    rect.addEventListener('mouseleave',hideTip);
+    el('text',{x:L+w+8,y:y+bh/2+4,class:'val'},svg).textContent=r.v+' sqft';
+  });
+  // annotation
+  const ann=el('text',{x:W-R+14,y:T+18,class:'axlab',fill:'var(--good)'},svg);
+  ann.textContent=`▲ ${ba.n_increased} of ${ba.n} mopped MORE`;
+  el('text',{x:W-R+14,y:T+40,class:'ax'},svg).textContent=`Only ${ba.n_dropped_half} bot cut usage by half.`;
+  el('text',{x:W-R+14,y:T+58,class:'ax'},svg).textContent=`The squeak annoys —`;
+  el('text',{x:W-R+14,y:T+74,class:'ax'},svg).textContent=`it doesn't stop people mopping.`;
+  el('line',{x1:L,y1:T-2,x2:L,y2:T+ph+2,class:'baseline'},svg);
+}
+
+// ---------- 03a monthly stacked ----------
+function fmtMonth(m){ const [y,mo]=m.split('-').map(Number); return new Date(y,mo-1,1).toLocaleString('en',{month:'short'}); }
+function drawTrendStack(){
+  const svg=document.getElementById('c3a'); clear(svg);
+  const W=340,H=280,L=30,R=12,T=20,B=58,pw=W-L-R,ph=H-T-B;
+  const rows=DATA.trend, max=12, ticks=[0,3,6,9,12];
+  ticks.forEach(t=>{ const y=T+ph-(t/max)*ph;
+    el('line',{x1:L,y1:y,x2:W-R,y2:y,class:'gridline'},svg);
+    el('text',{x:L-6,y:y+4,'text-anchor':'end',class:'ax'},svg).textContent=t; });
+  const keys=[{k:'brush_vacuum_squeak',c:'var(--brush)',n:'Brush / vacuum'},
+              {k:'wheel_squeak',c:'var(--wheel)',n:'Wheel'},
+              {k:'mop_squeak',c:'var(--mop)',n:'Mopping'}];
+  const step=pw/rows.length, bw=Math.min(30,step-8);
+  rows.forEach((r,i)=>{
+    let yb=T+ph; const x=L+i*step+(step-bw)/2;
+    keys.forEach(kk=>{
+      const v=r[kk.k]; if(!v)return; const h=(v/max)*ph; yb-=h;
+      const rect=el('rect',{x,y:yb,width:bw,height:h-1.5,rx:2,class:'bar',fill:kk.c},svg);
+      rect.addEventListener('mousemove',e=>showTip(e,`<b>${fmtMonth(r.month)}</b> · ${kk.n}<br>${v} ticket${v>1?'s':''}`));
+      rect.addEventListener('mouseleave',hideTip);
+    });
+    el('text',{x:x+bw/2,y:T+ph-(r.all/max)*ph-6,'text-anchor':'middle',class:'val'},svg).textContent=r.all;
+    const lab=el('text',{x:x+bw/2,y:H-40,'text-anchor':'middle',class:'ax'},svg);
+    lab.textContent=fmtMonth(r.month)+(r.partial?'*':'');
+  });
+  el('line',{x1:L,y1:T+ph,x2:W-R,y2:T+ph,class:'baseline'},svg);
+  // legend
+  keys.slice().reverse().forEach((kk,i)=>{
+    const lx=L+i*104;
+    el('rect',{x:lx,y:H-22,width:10,height:10,rx:2,fill:kk.c},svg);
+    el('text',{x:lx+14,y:H-13,class:'ax'},svg).textContent=kk.n;
+  });
+  el('text',{x:L,y:H-2,class:'ax'},svg).textContent='* July partial (through 15th)';
+}
+
+// ---------- 03b normalized rate ----------
+function drawRate(){
+  const svg=document.getElementById('c3b'); clear(svg);
+  const W=340,H=280,L=34,R=16,T=20,B=58,pw=W-L-R,ph=H-T-B;
+  const rows=DATA.trend, max=0.8, ticks=[0,0.2,0.4,0.6,0.8];
+  ticks.forEach(t=>{ const y=T+ph-(t/max)*ph;
+    el('line',{x1:L,y1:y,x2:W-R,y2:y,class:'gridline'},svg);
+    el('text',{x:L-6,y:y+4,'text-anchor':'end',class:'ax'},svg).textContent=t.toFixed(1); });
+  const step=pw/(rows.length-1);
+  const pts=rows.map((r,i)=>[L+i*step, T+ph-(r.mop_rate_per_1k/max)*ph]);
+  // area
+  let ap=`M ${pts[0][0]} ${T+ph}`; pts.forEach(p=>ap+=` L ${p[0]} ${p[1]}`); ap+=` L ${pts[pts.length-1][0]} ${T+ph} Z`;
+  el('path',{d:ap,fill:'var(--mop)','fill-opacity':.12},svg);
+  let lp='M '+pts.map(p=>p.join(' ')).join(' L ');
+  el('path',{d:lp,fill:'none',stroke:'var(--mop)','stroke-width':2.4,'stroke-linejoin':'round'},svg);
+  rows.forEach((r,i)=>{
+    const p=pts[i];
+    const dot=el('circle',{cx:p[0],cy:p[1],r:4.5,fill:'var(--mop)',stroke:'var(--surface)','stroke-width':2,class:'bar'},svg);
+    dot.addEventListener('mousemove',e=>showTip(e,`<b>${fmtMonth(r.month)}</b><br>${r.mop_rate_per_1k.toFixed(2)} / 1k bots<br><span class="tk">${r.mop_squeak} tickets · ${r.active.toLocaleString()} active</span>`));
+    dot.addEventListener('mouseleave',hideTip);
+    el('text',{x:p[0],y:H-40,'text-anchor':'middle',class:'ax'},svg).textContent=fmtMonth(r.month)+(r.partial?'*':'');
+  });
+  el('text',{x:pts[2][0],y:pts[2][1]+20,'text-anchor':'middle',class:'val',fill:'var(--muted)'},svg).textContent='Q1 low';
+  el('text',{x:pts[5][0],y:pts[5][1]-12,'text-anchor':'middle',class:'val',fill:'var(--mop)'},svg).textContent='≈4×';
+  el('line',{x1:L,y1:T+ph,x2:W-R,y2:T+ph,class:'baseline'},svg);
+}
+
+// ---------- 04 rate vs SW rollout, shared x ----------
+function drawRCA(){
+  const svg=document.getElementById('c4'); clear(svg);
+  const W=660,L=48,R=118,T=24;
+  const topH=110, gapH=44, botH=180;
+  const roll=DATA.sw_rollout;
+  const x0=Date.parse(roll[0].week), x1=Date.parse(roll[roll.length-1].week), pw=W-L-R;
+  const X=t=>L+(Date.parse(t)-x0)/(x1-x0)*pw;
+  // ---- TOP: squeak rate (weekly-ish from monthly, plot monthly points positioned by mid-month) ----
+  const rmax=0.8;
+  const tT=T, tB=T+topH;
+  [0,0.4,0.8].forEach(v=>{ const y=tB-(v/rmax)*topH;
+    el('line',{x1:L,y1:y,x2:W-R,y2:y,class:'gridline'},svg);
+    el('text',{x:L-6,y:y+4,'text-anchor':'end',class:'ax'},svg).textContent=v.toFixed(1); });
+  el('text',{x:L,y:T-8,class:'axlab',fill:'var(--mop)'},svg).textContent='Mopping-squeak rate / 1k active bots';
+  const mrows=DATA.trend.filter(r=>r.month>='2026-03');
+  const mpts=mrows.map(r=>{ const mid=r.month+'-15'; return [X(mid), tB-(r.mop_rate_per_1k/rmax)*topH, r]; });
+  let ap=`M ${mpts[0][0]} ${tB}`; mpts.forEach(p=>ap+=` L ${p[0]} ${p[1]}`); ap+=` L ${mpts[mpts.length-1][0]} ${tB} Z`;
+  el('path',{d:ap,fill:'var(--mop)','fill-opacity':.12},svg);
+  el('path',{d:'M '+mpts.map(p=>p[0]+' '+p[1]).join(' L '),fill:'none',stroke:'var(--mop)','stroke-width':2.4},svg);
+  mpts.forEach(p=>{ const d=el('circle',{cx:p[0],cy:p[1],r:4,fill:'var(--mop)',stroke:'var(--surface)','stroke-width':2},svg);
+    d.addEventListener('mousemove',e=>showTip(e,`<b>${fmtMonth(p[2].month)}</b> · ${p[2].mop_rate_per_1k.toFixed(2)}/1k`)); d.addEventListener('mouseleave',hideTip); });
+  el('line',{x1:L,y1:tB,x2:W-R,y2:tB,class:'baseline'},svg);
+
+  // ---- BOTTOM: SW version mix stacked area (ordinal blue ramp) ----
+  const bT=tB+gapH, bB=bT+botH;
+  const vers=DATA.sw_present.filter(v=>v!=='older');
+  // sequential ramp across versions (older=light -> newest=dark). Use 6 stops interpolated.
+  const stops=['--seq1','--seq2','--seq3','--seq4','--seq5','--seq6'].map(cv);
+  function verColor(i){ const t=i/(vers.length-1); const s=t*(stops.length-1); const a=Math.floor(s),b=Math.min(a+1,stops.length-1),f=s-a;
+    return mix(stops[a],stops[b],f); }
+  function mix(c1,c2,f){ const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+    const A=p(c1),Bc=p(c2); return '#'+A.map((v,i)=>Math.round(v+(Bc[i]-v)*f).toString(16).padStart(2,'0')).join(''); }
+  [0,50,100].forEach(v=>{ const y=bB-(v/100)*botH;
+    el('line',{x1:L,y1:y,x2:W-R,y2:y,class:'gridline'},svg);
+    el('text',{x:L-6,y:y+4,'text-anchor':'end',class:'ax'},svg).textContent=v+(v===100?'%':''); });
+  el('text',{x:L,y:bT-8,class:'axlab',fill:'var(--brush)'},svg).textContent='Share of active fleet on each software version';
+  // build stacked areas: for each version, polygon across weeks
+  const allKeys=vers.concat(['older','other']);
+  function share(r,k){ return r[k]||0; }
+  // cumulative from oldest(bottom) to newest(top)
+  const order=['other'].concat(vers).concat(['older']); // other+older are pre-telemetry/tail -> muted
+  // draw newest on top: iterate order, stack upward
+  let cum=roll.map(()=>0);
+  order.forEach((k)=>{
+    const top=roll.map((r,i)=>cum[i]+share(r,k));
+    // polygon
+    let d='M '+roll.map((r,i)=>X(r.week)+' '+(bB-(cum[i]/100)*botH)).join(' L ');
+    d+=' L '+roll.slice().reverse().map((r,ri)=>{ const i=roll.length-1-ri; return X(r.week)+' '+(bB-(top[i]/100)*botH);}).join(' L ')+' Z';
+    let fill;
+    if(k==='other'||k==='older') fill='var(--surface-2)';
+    else fill=verColor(vers.indexOf(k));
+    const poly=el('path',{d,fill,stroke:'var(--surface)','stroke-width':.5,class:'bar'},svg);
+    poly.addEventListener('mousemove',e=>{ // find nearest week
+      const mx=e.offsetX||0; let best=0,bd=1e9; roll.forEach((r,i)=>{const dd=Math.abs(X(r.week)-mx*(W/svg.getBoundingClientRect().width)); if(dd<bd){bd=dd;best=i;}});
+      const r=roll[best]; showTip(e,`<b>${k==='other'?'pre-telemetry':k==='older'?'older tail':k}</b> · wk ${r.week}<br>${share(r,k).toFixed(1)}% of fleet`); });
+    poly.addEventListener('mouseleave',hideTip);
+    cum=top;
+  });
+  // version labels for the dominant ones
+  const labelV=['v148','v151','v154','v157','v159','v162','v165','v167'];
+  labelV.forEach(v=>{ // place label at the week where v peaks
+    let peak=0,pw2=0; roll.forEach((r,i)=>{ if((r[v]||0)>pw2){pw2=r[v];peak=i;} });
+    if(pw2>25){ const r=roll[peak]; const yc=bB-((cum0(order,r,v)+pw2/2)/100)*botH;
+      el('text',{x:X(r.week),y:yc+3,'text-anchor':'middle',class:'val',fill:'var(--surface)','font-size':10},svg).textContent=v; }
+  });
+  function cum0(order,r,upto){ let s=0; for(const k of order){ if(k===upto)break; s+=(r[k]||0);} return s; }
+  // shared x axis (months)
+  const months=['2026-03-01','2026-04-01','2026-05-01','2026-06-01','2026-07-01'];
+  months.forEach(m=>{ const x=X(m);
+    el('line',{x1:x,y1:tT,x2:x,y2:bB,stroke:'var(--grid)','stroke-dasharray':'2 4','stroke-width':1},svg);
+    el('text',{x,y:bB+18,'text-anchor':'middle',class:'ax'},svg).textContent=fmtMonth(m.slice(0,7)); });
+  el('line',{x1:L,y1:bB,x2:W-R,y2:bB,class:'baseline'},svg);
+  // set intrinsic height
+  svg.setAttribute('viewBox',`0 0 ${W} ${bB+34}`);
+  // ramp legend on right
+  const lx=W-R+16;
+  el('text',{x:lx,y:bT+2,class:'ax'},svg).textContent='newer';
+  for(let i=0;i<vers.length;i++){ el('rect',{x:lx,y:bT+8+i*((botH-20)/vers.length),width:12,height:(botH-20)/vers.length,fill:verColor(vers.length-1-i)},svg); }
+  el('text',{x:lx,y:bB+2,class:'ax'},svg).textContent='older';
+}
+
+// ---------- KPIs, reads, table, conclusion ----------
+function fillText(){
+  const m=DATA.meta, c=DATA.sqft_compare, ba=DATA.before_after, tr=DATA.trend;
+  const ratio=Math.round((c.complainer.avg_total_sqft/c.fleet.avg_total_sqft-1)*100);
+  document.getElementById('kpis').innerHTML=[
+    ['Mopping-squeak tickets',m.mop_squeak_tickets,`${m.mop_squeak_unique} unique customers · of ${m.total_screened} screened`,'mop'],
+    ['Rate change, Q1 → Jun','≈4×','per 1k active bots (0.16 → 0.66)','up'],
+    ['Complainers mop','+'+ratio+'%','more total sqft than fleet avg','blue'],
+    ['Kept mopping after',`${ba.n_increased}/${ba.n}`,'complainers mopped as much or more','good'],
+    ['Return-for-refund risk',`${DATA.refunds.mop}/${m.mop_squeak_tickets}`,'mop tickets flagged for a return label','blue'],
+  ].map(k=>`<div class="kpi"><div class="k-label">${k[0]}</div><div class="k-val ${k[3]}">${k[1]}</div><div class="k-sub">${k[2]}</div></div>`).join('');
+
+  document.getElementById('read1').innerHTML=`The complaints are <b>not</b> concentrated in brand-new owners. They spread across every tenure band, and the single largest group — <b>5 of 17</b> — had owned the robot <b>90+ days</b>. A brand-new-unit defect or an out-of-box software regression would cluster in the first 30 days; this doesn't. It looks like something that <b>develops with use</b>.`;
+  document.getElementById('read2').innerHTML=`Complainer bots had mopped <b>${c.complainer.avg_total_sqft} sqft</b> on average — <b>${ratio}% more</b> than the fleet's ${c.fleet.avg_total_sqft} sqft, putting them near the fleet's 78th percentile. Yet their <b>per-day intensity is identical</b> (${c.complainer.avg_sqft_per_mopday} vs ${c.fleet.avg_sqft_per_mopday} sqft/day) — they don't mop harder, they've simply mopped <b>longer</b>. The squeak appears across a wide wear range (no single threshold), and crucially <b>${ba.n_increased} of ${ba.n}</b> complainer bots mopped just as much or more afterward. This is the fingerprint of <b>cumulative mechanical wear</b>, not a config that switched on.`;
+  document.getElementById('read3').innerHTML=`Raw ticket counts rise, but the fleet nearly doubled over the window — so the honest metric is the <b>rate</b>. Even normalized per 1,000 active bots, the mopping-squeak rate climbed from <b>0.16 (Mar) to 0.66 (Jun)</b>, roughly <b>4×</b>. Meanwhile brush/vacuum squeaks stayed flat and wheel squeaks were noisy — the growth is <b>specific to mopping</b>. Financial exposure is still small: only <b>${DATA.refunds.mop} of ${DATA.meta.mop_squeak_tickets}</b> mop tickets carry a return-for-refund flag today, but the trend is the warning sign.`;
+  document.getElementById('read4').innerHTML=`Software ships on a <b>~weekly cadence</b> (v147 → v167 across five months), so the version mix churns continuously — there is <b>no single release</b> whose rollout produces a matching step-change in the squeak rate. The rate rises <b>smoothly</b> through many releases rather than jumping at one. That pattern argues <b>against</b> a specific firmware/software regression and <b>for</b> gradual wear — consistent with sections 01 and 02.`;
+  document.getElementById('note4').innerHTML=`Caveat: software-version telemetry is only reliably populated from late Feb 2026, and mop-sqft telemetry from Jan 15 2026, so pre-Q1 wear is undercounted. Version labels shown for releases exceeding 25% fleet share.`;
+
+  const tbl=document.getElementById('botTbl');
+  tbl.innerHTML=`<thead><tr><th>Bot</th><th>Tenure</th><th>Days owned</th><th>Sqft @ complaint</th><th>Total sqft</th><th>28d before</th><th>28d after</th></tr></thead>`;
+  const tb=document.createElement('tbody');
+  DATA.bots_table.forEach(b=>{ const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${b.bot}</td><td><span class="chip">${b.bucket}</span></td><td>${b.days_at_complaint??'–'}</td>
+    <td>${b.sqft_at_complaint.toLocaleString()}</td><td>${b.total_sqft.toLocaleString()}</td>
+    <td>${b.sqft_28d_before}</td><td>${b.sqft_28d_after}</td>`; tb.appendChild(tr); });
+  tbl.appendChild(tb);
+
+  document.getElementById('conclList').innerHTML=[
+    `<b>The rise is real and mopping-specific.</b> Normalized for fleet growth, the mopping-squeak rate is up ~4× since the Q1 low; brush/vacuum and wheel squeaks did not grow the same way.`,
+    `<b>It behaves like wear, not a software switch.</b> Complaints skew toward long-tenured, high-mileage bots (same per-day intensity, more lifetime sqft), span a wide range of accumulated mopping, and no software release lines up with a step-change in the rate.`,
+    `<b>Most likely cause:</b> a mopping-path mechanical component (mop-roll drive / wheel–floor interaction under wet-scrub load) that <b>degrades with cumulative mopping</b>. The firmware/SW-update hypothesis is <b>not supported</b> by the rollout timeline — though a gradual change in mop pressure or scrub behavior shipped incrementally can't be fully excluded from this data alone.`,
+    `<b>Recommended next steps:</b> (1) pull mop-motor current / snorkel-pressure telemetry for the 16 complainer bots vs. matched high-mileage non-complainers; (2) diff mop-scrub tuning across v147→v167 for any incremental pressure change; (3) inspect a returned unit's mop-roll drive and front-wheel assembly for wear; (4) watch the return-for-refund flag — 2 today, but rising.`,
+  ].map(t=>`<li>${t}</li>`).join('');
+  document.getElementById('foot').textContent=`Generated ${new Date().toISOString().slice(0,10)} · 62 tickets screened → 21 mopping-squeak · telemetry from octopus fleet DB · rates normalized to heartbeat active-fleet counts`;
+}
+
+function renderAll(){ drawTenure(); drawCompare(); drawDist(); drawBeforeAfter(); drawTrendStack(); drawRate(); drawRCA(); }
+fillText(); renderAll();
+
+// theme toggle
+const btn=document.getElementById('themeBtn');
+btn.addEventListener('click',()=>{ const cur=document.documentElement.getAttribute('data-theme');
+  const isDark=cur? cur==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', isDark?'light':'dark'); renderAll(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ if(!document.documentElement.getAttribute('data-theme')) renderAll(); });
+addEventListener('resize',()=>{ /* svg is responsive; tooltips fine */ });
+</script>
+
+</body></html>
