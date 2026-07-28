@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snorkel Clog Klaviyo Outreach — Summary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117; color: #e2e8f0; min-height: 100vh;
+      padding: 32px 24px 64px; line-height: 1.5;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; }
+    h1 { font-size: 1.6rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+    .subtitle { font-size: 0.875rem; color: #64748b; margin-bottom: 8px; }
+    .subjects { font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px; }
+    .subjects code { background: #1e2330; border: 1px solid #2d3748; border-radius: 5px;
+      padding: 1px 7px; color: #cbd5e1; font-size: 0.76rem; white-space: nowrap; display: inline-block; margin: 2px 2px; }
+    .redact-note { font-size: 0.74rem; color: #6b7280; background: #14181f; border: 1px solid #262d3b;
+      border-radius: 8px; padding: 8px 12px; margin-bottom: 28px; }
+    h2 { font-size: 1.05rem; font-weight: 700; color: #f8fafc; margin: 34px 0 14px;
+      padding-bottom: 8px; border-bottom: 1px solid #2d3748; }
+    .kpi-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+    .kpi { background: #1e2330; border: 1px solid #2d3748; border-radius: 12px;
+      padding: 16px 20px; min-width: 130px; flex: 1; }
+    .kpi-label { font-size: 0.68rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .kpi-value { font-size: 1.7rem; font-weight: 700; color: #f8fafc; }
+    .kpi-value.red { color: #f87171; } .kpi-value.amber { color: #fbbf24; } .kpi-value.blue { color: #60a5fa; }
+    .kpi-sub { font-size: 0.68rem; color: #94a3b8; margin-top: 4px; }
+    ol.people, ul.people { list-style: none; }
+    .person { background: #171b24; border: 1px solid #262d3b; border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 10px; }
+    .person .name { font-weight: 650; color: #f1f5f9; }
+    .person .note { font-size: 0.87rem; color: #cbd5e1; margin-top: 2px; }
+    .person .meta { font-size: 0.78rem; color: #8b98ab; margin-top: 5px; }
+    a.tkt { color: #60a5fa; text-decoration: none; font-size: 0.8rem; font-weight: 600; }
+    a.tkt:hover { text-decoration: underline; }
+    .pill { display: inline-block; font-size: 0.68rem; font-weight: 700; border-radius: 20px;
+      padding: 2px 10px; margin-left: 6px; vertical-align: middle; }
+    .pill.ship-no { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.35); }
+    .pill.ship-yes { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.35); }
+    .pill.ship-unk { background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.35); }
+    table { width: 100%; border-collapse: collapse; background: #171b24; border: 1px solid #262d3b;
+      border-radius: 10px; overflow: hidden; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid #262d3b; }
+    th { background: #1e2330; color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:last-child td { border-bottom: none; }
+    td.num { text-align: right; font-weight: 700; color: #f1f5f9; width: 90px; }
+    tr.sub td { color: #8b98ab; font-size: 0.82rem; padding-left: 28px; }
+    .q { background: #1a1526; border: 1px solid #3b2d55; border-left: 3px solid #a78bfa;
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 12px; }
+    .q .qh { font-weight: 700; color: #e9d5ff; margin-bottom: 4px; }
+    .q .qbody { font-size: 0.88rem; color: #cbd5e1; }
+    .q .qsub { font-size: 0.8rem; color: #94a3b8; margin-top: 6px; }
+    .grp { font-size: 0.78rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 8px; font-weight: 700; }
+    footer { margin-top: 40px; font-size: 0.74rem; color: #4b5563; border-top: 1px solid #262d3b; padding-top: 14px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌀 Snorkel Clog Klaviyo Outreach — Summary</h1>
+  <div class="subtitle">Customer replies to the accessory outreach (new wringer + cap / mop tube cleaner). Window: <strong>Sun Jul 12 → Wed Jul 15, 2026</strong> · re-scanned 2026-07-15 · <strong>16 replies</strong>, no new replies since Jul 14.</div>
+  <div class="subjects">Outreach subject lines:
+    <code>A New Wringer for Your Matic</code>
+    <code>New Matic Accessories Are Coming Your Way</code>
+    <code>A New Cap For Your Matic</code>
+    <code>We Have Some Upgrades For Your Matic</code>
+  </div>
+  <div class="redact-note">🔒 Public page — customer PII redacted (names shown as first name + last initial; street addresses, tracking numbers, and emails omitted). Full detail and the internal HubSpot ticket links live in the Notion page. "Open ticket" links require HubSpot login.</div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Total replies</div><div class="kpi-value">16</div><div class="kpi-sub">Jul 12–15</div></div>
+    <div class="kpi"><div class="kpi-label">MTC resend</div><div class="kpi-value amber">3</div><div class="kpi-sub">broken / misplaced</div></div>
+    <div class="kpi"><div class="kpi-label">Address change</div><div class="kpi-value blue">3</div><div class="kpi-sub">1 already shipped</div></div>
+    <div class="kpi"><div class="kpi-label">Bay Area visit</div><div class="kpi-value">4</div><div class="kpi-sub">wants a team visit</div></div>
+  </div>
+
+  <h2>1 · Extra mop tube cleaner send <span style="font-weight:400;color:#8b98ab;font-size:0.85rem">(already received it, but broken or misplaced)</span></h2>
+  <ol class="people">
+    <li class="person"><div class="name">Darrell S.</div><div class="note">Handle broke off the mop tube cleaner, needs a new one.</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321963630323" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Geoff S.</div><div class="note">"Need a mop tool."</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321402514122" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Rohit T.</div><div class="note">"I also don't have the mop tube cleaner." <em>(also a Bay Area visit request — see §3)</em></div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321402531556" target="_blank">Open ticket ↗</a></div></li>
+  </ol>
+
+  <h2>2 · Address change</h2>
+  <div class="subtitle" style="margin-bottom:14px">Shipment status checked in Shopify 2026-07-15. Outreach kit = Wringer + Mop Tube Cleaner + Solvent tank cap.</div>
+  <ol class="people">
+    <li class="person"><div class="name">Prasanna V. <span class="pill ship-no">NOT SHIPPED</span></div><div class="note">Wants parts sent to a new address (Sunnyvale, CA).</div><div class="meta">Order #28496 is <strong>unfulfilled</strong> (currently mis-addressed) — just update the shipping address before fulfillment. &nbsp;·&nbsp; <a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321796157156" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Ravi S. <span class="pill ship-yes">ALREADY SHIPPED</span></div><div class="note">"My address has changed. How can I update it?"</div><div class="meta">Order #27529 already fulfilled 2026-07-14 and shipped to the old address (Chicago, IL). <strong>Decision needed</strong> (see Open Questions). New address not yet provided; contact phone is international (+91). &nbsp;·&nbsp; <a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/322022515388" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Blake <span class="pill ship-unk">NO ORDER FOUND</span></div><div class="note">Provided a shipping address (Portland, OR).</div><div class="meta">No outreach order found under his email — parts not shipped; confirm/create the order (order may exist under a different email — needs lookup). &nbsp;·&nbsp; <a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321948148446" target="_blank">Open ticket ↗</a></div></li>
+  </ol>
+
+  <h2>3 · Bay Area customers who want a team visit</h2>
+  <ol class="people">
+    <li class="person"><div class="name">Joe S. <span style="color:#8b98ab;font-weight:400;font-size:0.85rem">· Menlo Park, CA</span></div><div class="note">"If y'all don't mind coming by to help install it, we'd appreciate the help."</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321899193072" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Siddharth P. <span style="color:#8b98ab;font-weight:400;font-size:0.85rem">· San Jose, CA</span></div><div class="note">"We are local in bay area, would love for someone to come by."</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321305625323" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Prital K. <span style="color:#8b98ab;font-weight:400;font-size:0.85rem">· Burlingame, CA</span></div><div class="note">"Yes please come by and help us fix it."</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321948243676" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Rohit T. <span style="color:#8b98ab;font-weight:400;font-size:0.85rem">· Cupertino, CA</span></div><div class="note">"What time would work if I wanted to opt for y'all helping with the replacement?"</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321402531556" target="_blank">Open ticket ↗</a></div></li>
+  </ol>
+
+  <h2>❓ Open Questions / Decisions Needed</h2>
+  <div class="q">
+    <div class="qh">Q1 — Address change after the parts have already shipped: what is our policy?</div>
+    <div class="qbody">When a customer asks to change their address <em>after</em> the outreach kit already shipped to the old one, do we (a) intercept the package with the carrier, (b) ship a replacement to the new address, or (c) ask the customer to forward / pick it up?</div>
+    <div class="qsub"><strong style="color:#f87171">Count: 1 so far — Ravi S.</strong> (order #27529 already shipped to Chicago; now wants a different address, not yet provided).<br>
+    · <strong>Redirectable — not yet shipped:</strong> Prasanna V. (just update the address on open order #28496).<br>
+    · <strong>Needs lookup:</strong> Blake (no order found under his email yet).</div>
+  </div>
+  <div class="q">
+    <div class="qh">Q2 — Cap for customers with extra water tanks</div>
+    <div class="qbody">Do additional water tanks bought separately get a replacement cap, or will the cap be sold standalone? (raised by Raj A.)</div>
+  </div>
+
+  <h2>Other replies (for completeness)</h2>
+  <div class="grp">Praise / acknowledgement — no action needed</div>
+  <ul class="people">
+    <li class="person"><div class="name">Anne S.</div><div class="note">"Thanks!"</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321803214553" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Weijia</div><div class="note">"You guys are awesome!"</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321758236400" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Bill W.</div><div class="note">"Sounds like a nice upgrade, I'll be looking forward to it!"</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321948258031" target="_blank">Open ticket ↗</a></div></li>
+  </ul>
+  <div class="grp">Questions / complaints — needs a reply</div>
+  <ul class="people">
+    <li class="person"><div class="name">Raj A.</div><div class="note">Bought 2 extra water tanks; asks if those get a replacement cap too, or if the cap will be sold separately.</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321948211906" target="_blank">Open ticket ↗</a></div></li>
+    <li class="person"><div class="name">Tim A.</div><div class="note">"Disappointed in mine so far, always gets stuck, even during the mapping process."</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321817194179" target="_blank">Open ticket ↗</a></div></li>
+  </ul>
+  <div class="grp">Special case</div>
+  <ul class="people">
+    <li class="person"><div class="name">Nora P. <span style="color:#8b98ab;font-weight:400;font-size:0.85rem">· San Francisco, CA</span></div><div class="note">Already shipped her unit back for a water-tank issue; asks that the new wringer be installed while the unit is on-site before it ships back (not a home visit).</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321920657138" target="_blank">Open ticket ↗</a></div></li>
+  </ul>
+  <div class="grp">Needs manual review</div>
+  <ul class="people">
+    <li class="person"><div class="name">Paulette S.</div><div class="note">Reply body came through empty ("Sent from my iPad"), no discernible request — open the thread to confirm intent.</div><div class="meta"><a class="tkt" href="https://app-na2.hubspot.com/help-desk/45064405/view/104989783/ticket/321974666941" target="_blank">Open ticket ↗</a></div></li>
+  </ul>
+
+  <h2>Summary counts</h2>
+  <table>
+    <thead><tr><th>Category</th><th class="num">Count</th></tr></thead>
+    <tbody>
+      <tr><td>Extra mop tube cleaner send (broken / misplaced)</td><td class="num">3</td></tr>
+      <tr><td>Address change</td><td class="num">3</td></tr>
+      <tr class="sub"><td>↳ of which — parts already shipped (decision needed)</td><td class="num">1</td></tr>
+      <tr><td>Bay Area — wants a team visit</td><td class="num">4</td></tr>
+      <tr><td>Praise / acknowledgement only (no action)</td><td class="num">3</td></tr>
+      <tr><td>Questions / complaints (needs a reply)</td><td class="num">2</td></tr>
+      <tr><td>Special case (install during repair)</td><td class="num">1</td></tr>
+      <tr><td>Needs manual review (empty reply body)</td><td class="num">1</td></tr>
+    </tbody>
+  </table>
+
+  <footer>Source: HubSpot help-desk tickets + Shopify order data · Matic Robots · generated 2026-07-15. PII redacted for public hosting; ticket links open in HubSpot (internal).</footer>
+</div>
+</body>
+</html>
