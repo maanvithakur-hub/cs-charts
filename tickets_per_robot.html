@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Weekly Charts</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 24px;
+  }
+  .chart-container {
+    max-width: 1100px;
+    margin: 0 auto 24px auto;
+    background: #16213e;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+  h1 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: #f0f0f0;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 20px;
+  }
+  canvas { max-height: 500px; }
+</style>
+</head>
+<body>
+<div class="chart-container">
+  <h1>Weekly Active Bots per Bug Ticket</h1>
+  <p class="subtitle">Hardware &amp; Software (incl. App) &middot; Past 13 Weeks &middot; Axis inverted (low on top, high on bottom) &middot; Updated 2026-07-28</p>
+  <canvas id="normChart"></canvas>
+</div>
+<div class="chart-container">
+  <h1>Weekly Bots That Cleaned per Bug Ticket</h1>
+  <p class="subtitle">Denominator: bots that ran a session that week (reliability during use) &middot; Axis inverted (low on top, high on bottom)</p>
+  <canvas id="cleanChart"></canvas>
+</div>
+<div class="chart-container">
+  <h1>Weekly Cleaners as % of Active Bots</h1>
+  <p class="subtitle">Share of heartbeat-active bots that ran at least one cleaning session that week &middot; higher = more engagement</p>
+  <canvas id="engagementChart"></canvas>
+</div>
+<div class="chart-container">
+  <h1>Weekly Bug Tickets per 100 Active Bots — by Cohort</h1>
+  <p class="subtitle">First week (0–6 days since <em>first heartbeat</em>) &middot; Rest of month (7–29) &middot; Existing (30+) &middot; tickets per 100 active bots in each cohort</p>
+  <canvas id="cohortRateChart"></canvas>
+</div>
+<div class="chart-container">
+  <h1>Weekly p95 Time to First Response</h1>
+  <p class="subtitle">Bug tickets (HW / SW / App) &middot; business hours only (Mon–Fri 10am–7pm PT) &middot; Pearson r(volume, p95) = +0.28</p>
+  <canvas id="ttfrChart"></canvas>
+</div>
+<div class="chart-container">
+  <h1>Ticket Breakdown by Type</h1>
+  <p class="subtitle">07/20-07/26 &middot; 284 tickets (+12.3% vs prior week) &middot; 31.9 bots/ticket (-7.5% vs prior week) &middot; 9,068 active bots</p>
+  <canvas id="typeChart"></canvas>
+</div>
+<script>
+const data = [{"label": "04/27-05/03", "hw": 77, "sw": 26, "app": 1, "total": 104, "hw_pct": 74.0, "sw_pct": 25.0, "app_pct": 1.0, "robots": 5894, "hw_ratio": 76.5, "sw_app_ratio": 218.3, "cleaners_n": 4501, "hw_clean_ratio": 58.5, "sw_app_clean_ratio": 166.7, "engagement_pct": 76.4, "ttfr_p95_h": 16.8, "ttfr_n": 104, "fw_tickets": 14, "rm_tickets": 12, "ex_tickets": 50, "fw_active": 229, "rm_active": 578, "ex_active": 5087, "fw_rate": 6.11, "rm_rate": 2.08, "ex_rate": 0.98}, {"label": "05/04-05/10", "hw": 83, "sw": 16, "app": 5, "total": 104, "hw_pct": 79.8, "sw_pct": 15.4, "app_pct": 4.8, "robots": 6165, "hw_ratio": 74.3, "sw_app_ratio": 293.6, "cleaners_n": 4724, "hw_clean_ratio": 56.9, "sw_app_clean_ratio": 225.0, "engagement_pct": 76.6, "ttfr_p95_h": 11.63, "ttfr_n": 103, "fw_tickets": 22, "rm_tickets": 14, "ex_tickets": 45, "fw_active": 283, "rm_active": 647, "ex_active": 5235, "fw_rate": 7.77, "rm_rate": 2.16, "ex_rate": 0.86}, {"label": "05/11-05/17", "hw": 119, "sw": 24, "app": 2, "total": 145, "hw_pct": 82.1, "sw_pct": 16.6, "app_pct": 1.4, "robots": 6393, "hw_ratio": 53.7, "sw_app_ratio": 245.9, "cleaners_n": 4871, "hw_clean_ratio": 40.9, "sw_app_clean_ratio": 187.3, "engagement_pct": 76.2, "ttfr_p95_h": 16.95, "ttfr_n": 145, "fw_tickets": 17, "rm_tickets": 27, "ex_tickets": 62, "fw_active": 253, "rm_active": 731, "ex_active": 5409, "fw_rate": 6.72, "rm_rate": 3.69, "ex_rate": 1.15}, {"label": "05/18-05/24", "hw": 106, "sw": 25, "app": 1, "total": 132, "hw_pct": 80.3, "sw_pct": 18.9, "app_pct": 0.8, "robots": 6627, "hw_ratio": 62.5, "sw_app_ratio": 254.9, "cleaners_n": 5130, "hw_clean_ratio": 48.4, "sw_app_clean_ratio": 197.3, "engagement_pct": 77.4, "ttfr_p95_h": 20.18, "ttfr_n": 130, "fw_tickets": 21, "rm_tickets": 21, "ex_tickets": 56, "fw_active": 277, "rm_active": 787, "ex_active": 5563, "fw_rate": 7.58, "rm_rate": 2.67, "ex_rate": 1.01}, {"label": "05/25-05/31", "hw": 89, "sw": 34, "app": 1, "total": 124, "hw_pct": 71.8, "sw_pct": 27.4, "app_pct": 0.8, "robots": 6846, "hw_ratio": 76.9, "sw_app_ratio": 195.6, "cleaners_n": 5250, "hw_clean_ratio": 59.0, "sw_app_clean_ratio": 150.0, "engagement_pct": 76.7, "ttfr_p95_h": 15.87, "ttfr_n": 124, "fw_tickets": 11, "rm_tickets": 19, "ex_tickets": 64, "fw_active": 263, "rm_active": 842, "ex_active": 5741, "fw_rate": 4.18, "rm_rate": 2.26, "ex_rate": 1.11}, {"label": "06/01-06/07", "hw": 97, "sw": 30, "app": 5, "total": 132, "hw_pct": 73.5, "sw_pct": 22.7, "app_pct": 3.8, "robots": 7094, "hw_ratio": 73.1, "sw_app_ratio": 202.7, "cleaners_n": 5415, "hw_clean_ratio": 55.8, "sw_app_clean_ratio": 154.7, "engagement_pct": 76.3, "ttfr_p95_h": 26.1, "ttfr_n": 132, "fw_tickets": 19, "rm_tickets": 24, "ex_tickets": 55, "fw_active": 306, "rm_active": 865, "ex_active": 5923, "fw_rate": 6.21, "rm_rate": 2.77, "ex_rate": 0.93}, {"label": "06/08-06/14", "hw": 99, "sw": 17, "app": 2, "total": 118, "hw_pct": 83.9, "sw_pct": 14.4, "app_pct": 1.7, "robots": 7280, "hw_ratio": 73.5, "sw_app_ratio": 383.2, "cleaners_n": 5494, "hw_clean_ratio": 55.5, "sw_app_clean_ratio": 289.2, "engagement_pct": 75.5, "ttfr_p95_h": 22.41, "ttfr_n": 117, "fw_tickets": 7, "rm_tickets": 16, "ex_tickets": 67, "fw_active": 236, "rm_active": 872, "ex_active": 6172, "fw_rate": 2.97, "rm_rate": 1.83, "ex_rate": 1.09}, {"label": "06/15-06/21", "hw": 98, "sw": 25, "app": 1, "total": 124, "hw_pct": 79.0, "sw_pct": 20.2, "app_pct": 0.8, "robots": 7469, "hw_ratio": 76.2, "sw_app_ratio": 287.3, "cleaners_n": 5564, "hw_clean_ratio": 56.8, "sw_app_clean_ratio": 214.0, "engagement_pct": 74.5, "ttfr_p95_h": 27.57, "ttfr_n": 124, "fw_tickets": 14, "rm_tickets": 15, "ex_tickets": 79, "fw_active": 236, "rm_active": 863, "ex_active": 6370, "fw_rate": 5.93, "rm_rate": 1.74, "ex_rate": 1.24}, {"label": "06/22-06/28", "hw": 99, "sw": 19, "app": 3, "total": 121, "hw_pct": 81.8, "sw_pct": 15.7, "app_pct": 2.5, "robots": 7706, "hw_ratio": 77.8, "sw_app_ratio": 350.3, "cleaners_n": 5793, "hw_clean_ratio": 58.5, "sw_app_clean_ratio": 263.3, "engagement_pct": 75.2, "ttfr_p95_h": 27.0, "ttfr_n": 121, "fw_tickets": 9, "rm_tickets": 16, "ex_tickets": 75, "fw_active": 265, "rm_active": 836, "ex_active": 6605, "fw_rate": 3.4, "rm_rate": 1.91, "ex_rate": 1.14}, {"label": "06/29-07/05", "hw": 111, "sw": 25, "app": 5, "total": 141, "hw_pct": 78.7, "sw_pct": 17.7, "app_pct": 3.5, "robots": 7959, "hw_ratio": 71.7, "sw_app_ratio": 265.3, "cleaners_n": 5907, "hw_clean_ratio": 53.2, "sw_app_clean_ratio": 196.9, "engagement_pct": 74.2, "ttfr_p95_h": 34.62, "ttfr_n": 141, "fw_tickets": 20, "rm_tickets": 14, "ex_tickets": 90, "fw_active": 299, "rm_active": 803, "ex_active": 6857, "fw_rate": 6.69, "rm_rate": 1.74, "ex_rate": 1.31}, {"label": "07/06-07/12", "hw": 110, "sw": 25, "app": 0, "total": 135, "hw_pct": 81.5, "sw_pct": 18.5, "app_pct": 0.0, "robots": 8332, "hw_ratio": 75.7, "sw_app_ratio": 333.3, "cleaners_n": 6211, "hw_clean_ratio": 56.5, "sw_app_clean_ratio": 248.4, "engagement_pct": 74.5, "ttfr_p95_h": 25.87, "ttfr_n": 135, "fw_tickets": 19, "rm_tickets": 12, "ex_tickets": 85, "fw_active": 415, "rm_active": 849, "ex_active": 7068, "fw_rate": 4.58, "rm_rate": 1.41, "ex_rate": 1.2}, {"label": "07/13-07/19", "hw": 99, "sw": 29, "app": 1, "total": 129, "hw_pct": 76.7, "sw_pct": 22.5, "app_pct": 0.8, "robots": 8733, "hw_ratio": 88.2, "sw_app_ratio": 291.1, "cleaners_n": 6543, "hw_clean_ratio": 66.1, "sw_app_clean_ratio": 218.1, "engagement_pct": 74.9, "ttfr_p95_h": 18.4, "ttfr_n": 129, "fw_tickets": 24, "rm_tickets": 11, "ex_tickets": 76, "fw_active": 456, "rm_active": 1043, "ex_active": 7234, "fw_rate": 5.26, "rm_rate": 1.05, "ex_rate": 1.05}, {"label": "07/20-07/26", "hw": 125, "sw": 34, "app": 4, "total": 163, "hw_pct": 76.7, "sw_pct": 20.9, "app_pct": 2.5, "robots": 9068, "hw_ratio": 72.5, "sw_app_ratio": 238.6, "cleaners_n": 6837, "hw_clean_ratio": 54.7, "sw_app_clean_ratio": 179.9, "engagement_pct": 75.4, "ttfr_p95_h": 18.64, "ttfr_n": 159, "fw_tickets": 29, "rm_tickets": 31, "ex_tickets": 88, "fw_active": 392, "rm_active": 1215, "ex_active": 7461, "fw_rate": 7.4, "rm_rate": 2.55, "ex_rate": 1.18}];
+
+// --- Chart 1: Robots per ticket (line) ---
+const normLabels = data.map(d => d.label + '\n(' + d.robots.toLocaleString() + ' active)');
+new Chart(document.getElementById('normChart'), {
+  type: 'line',
+  data: {
+    labels: normLabels,
+    datasets: [
+      {
+        label: 'Hardware',
+        data: data.map(d => d.hw_ratio),
+        borderColor: 'rgba(239, 83, 80, 1)',
+        backgroundColor: 'rgba(239, 83, 80, 0.15)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: 'rgba(239, 83, 80, 1)',
+        fill: true,
+        tension: 0.25,
+      },
+      {
+        label: 'Software (incl. App)',
+        data: data.map(d => d.sw_app_ratio),
+        borderColor: 'rgba(66, 165, 245, 1)',
+        backgroundColor: 'rgba(66, 165, 245, 0.15)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: 'rgba(66, 165, 245, 1)',
+        fill: true,
+        tension: 0.25,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#ccc', font: { size: 13 } } },
+      tooltip: {
+        callbacks: {
+          title: function(items) {
+            const d = data[items[0].dataIndex];
+            return d.label + '  \u00b7  ' + d.robots.toLocaleString() + ' active bots';
+          },
+          label: function(item) {
+            const d = data[item.dataIndex];
+            const isHW = item.datasetIndex === 0;
+            const raw = isHW ? d.hw : (d.sw + d.app);
+            const type = isHW ? 'HW' : 'SW+App';
+            const y = item.parsed.y;
+            const yStr = (y === null || y === undefined) ? '—' : y.toFixed(1);
+            return type + ': ' + yStr + ' active bots per ticket (' + raw + ' tickets)';
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#aaa', font: { size: 11 }, maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      y: { beginAtZero: true, min: 0, reverse: true,
+        title: { display: true, text: 'Active Robots per Ticket', color: '#aaa', font: { size: 13 } },
+        ticks: { color: '#aaa', callback: v => v.toFixed(0) },
+        grid: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  }
+});
+
+// --- Chart 1b: Bots that cleaned per bug ticket (line) ---
+const cleanLabels = data.map(d => d.label + '\n(' + d.cleaners_n.toLocaleString() + ' cleaners)');
+new Chart(document.getElementById('cleanChart'), {
+  type: 'line',
+  data: {
+    labels: cleanLabels,
+    datasets: [
+      {
+        label: 'Hardware',
+        data: data.map(d => d.hw_clean_ratio),
+        borderColor: 'rgba(239, 83, 80, 1)',
+        backgroundColor: 'rgba(239, 83, 80, 0.15)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: 'rgba(239, 83, 80, 1)',
+        fill: true,
+        tension: 0.25,
+      },
+      {
+        label: 'Software (incl. App)',
+        data: data.map(d => d.sw_app_clean_ratio),
+        borderColor: 'rgba(66, 165, 245, 1)',
+        backgroundColor: 'rgba(66, 165, 245, 0.15)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: 'rgba(66, 165, 245, 1)',
+        fill: true,
+        tension: 0.25,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#ccc', font: { size: 13 } } },
+      tooltip: {
+        callbacks: {
+          title: function(items) {
+            const d = data[items[0].dataIndex];
+            return d.label + '  \u00b7  ' + d.cleaners_n.toLocaleString() + ' bots that cleaned';
+          },
+          label: function(item) {
+            const d = data[item.dataIndex];
+            const isHW = item.datasetIndex === 0;
+            const raw = isHW ? d.hw : (d.sw + d.app);
+            const type = isHW ? 'HW' : 'SW+App';
+            const y = item.parsed.y;
+            const yStr = (y === null || y === undefined) ? '—' : y.toFixed(1);
+            return type + ': ' + yStr + ' cleaners per ticket (' + raw + ' tickets)';
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#aaa', font: { size: 11 }, maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      y: { beginAtZero: true, min: 0, reverse: true,
+        title: { display: true, text: 'Cleaners per Ticket', color: '#aaa', font: { size: 13 } },
+        ticks: { color: '#aaa', callback: v => v.toFixed(0) },
+        grid: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  }
+});
+
+// --- Chart 1c: Cleaners as % of active bots (line) ---
+const engLabels = data.map(d => d.label + '\n(' + d.robots.toLocaleString() + ' active)');
+new Chart(document.getElementById('engagementChart'), {
+  type: 'line',
+  data: {
+    labels: engLabels,
+    datasets: [
+      {
+        label: '% of Active Bots That Cleaned',
+        data: data.map(d => d.engagement_pct),
+        borderColor: 'rgba(102, 187, 106, 1)',
+        backgroundColor: 'rgba(102, 187, 106, 0.15)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: 'rgba(102, 187, 106, 1)',
+        fill: true,
+        tension: 0.25,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#ccc', font: { size: 13 } } },
+      tooltip: {
+        callbacks: {
+          title: function(items) {
+            const d = data[items[0].dataIndex];
+            return d.label + '  \u00b7  ' + d.robots.toLocaleString() + ' active bots';
+          },
+          label: function(item) {
+            const d = data[item.dataIndex];
+            const y = item.parsed.y;
+            const yStr = (y === null || y === undefined) ? '—' : y.toFixed(1) + '%';
+            return yStr + ' (' + d.cleaners_n.toLocaleString() + ' of ' + d.robots.toLocaleString() + ' cleaned)';
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#aaa', font: { size: 11 }, maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      y: { beginAtZero: true, min: 0, max: 100,
+        title: { display: true, text: '% of Active Bots That Cleaned', color: '#aaa', font: { size: 13 } },
+        ticks: { color: '#aaa', callback: v => v + '%' },
+        grid: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  }
+});
+
+// --- Chart 1e: Bug tickets per active bot by cohort (line) ---
+new Chart(document.getElementById('cohortRateChart'), {
+  type: 'line',
+  data: {
+    labels: data.map(d => d.label + '\n(' + d.robots.toLocaleString() + ' active)'),
+    datasets: [
+      {
+        label: 'First week (0–6 days)',
+        data: data.map(d => d.fw_rate),
+        borderColor: 'rgba(102, 187, 106, 1)',
+        backgroundColor: 'rgba(102, 187, 106, 0.12)',
+        borderWidth: 2.5, pointRadius: 4, pointHoverRadius: 6,
+        tension: 0.25, fill: false,
+      },
+      {
+        label: 'Rest of month (7–29)',
+        data: data.map(d => d.rm_rate),
+        borderColor: 'rgba(255, 167, 38, 1)',
+        backgroundColor: 'rgba(255, 167, 38, 0.12)',
+        borderWidth: 2.5, pointRadius: 4, pointHoverRadius: 6,
+        tension: 0.25, fill: false,
+      },
+      {
+        label: 'Existing (30+)',
+        data: data.map(d => d.ex_rate),
+        borderColor: 'rgba(66, 165, 245, 1)',
+        backgroundColor: 'rgba(66, 165, 245, 0.12)',
+        borderWidth: 2.5, pointRadius: 4, pointHoverRadius: 6,
+        tension: 0.25, fill: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#ccc', font: { size: 13 } } },
+      tooltip: {
+        callbacks: {
+          title: function(items) { return data[items[0].dataIndex].label; },
+          label: function(item) {
+            const d = data[item.dataIndex];
+            const y = item.parsed.y;
+            if (y === null || y === undefined) return item.dataset.label + ': —';
+            let raw, active;
+            if (item.datasetIndex === 0) { raw = d.fw_tickets; active = d.fw_active; }
+            else if (item.datasetIndex === 1) { raw = d.rm_tickets; active = d.rm_active; }
+            else { raw = d.ex_tickets; active = d.ex_active; }
+            return item.dataset.label + ': ' + y.toFixed(2) + ' per 100 (' + raw + ' tickets / ' + active.toLocaleString() + ' active)';
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#aaa', font: { size: 11 }, maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      y: { beginAtZero: true, min: 0,
+        title: { display: true, text: 'Bug Tickets per 100 Active Bots', color: '#aaa', font: { size: 13 } },
+        ticks: { color: '#aaa', callback: v => v.toFixed(1) },
+        grid: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  }
+});
+
+// --- Chart 1d: p95 time to first agent reply + ticket volume (line, dual axis) ---
+const ttfrLabels = data.map(d => d.label + '\n(' + d.robots.toLocaleString() + ' active)');
+new Chart(document.getElementById('ttfrChart'), {
+  type: 'line',
+  data: {
+    labels: ttfrLabels,
+    datasets: [
+      {
+        label: 'p95 Time to First Response',
+        data: data.map(d => d.ttfr_p95_h),
+        borderColor: 'rgba(255, 167, 38, 1)',
+        backgroundColor: 'rgba(255, 167, 38, 0.15)',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: 'rgba(255, 167, 38, 1)',
+        fill: true,
+        tension: 0.25,
+        yAxisID: 'y',
+      },
+      {
+        label: 'Bug ticket volume',
+        data: data.map(d => d.total),
+        borderColor: 'rgba(120, 144, 156, 1)',
+        backgroundColor: 'rgba(120, 144, 156, 0.05)',
+        borderWidth: 2,
+        borderDash: [6, 5],
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: 'rgba(120, 144, 156, 1)',
+        fill: false,
+        tension: 0.25,
+        yAxisID: 'y1',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#ccc', font: { size: 13 } } },
+      tooltip: {
+        callbacks: {
+          title: function(items) {
+            const d = data[items[0].dataIndex];
+            return d.label + '  \u00b7  ' + d.ttfr_n + ' bug tickets with first-reply time';
+          },
+          label: function(item) {
+            const y = item.parsed.y;
+            if (y === null || y === undefined) return item.dataset.label + ': —';
+            if (item.datasetIndex === 0) {
+              const hrs = Math.floor(y);
+              const mins = Math.round((y - hrs) * 60);
+              return 'p95: ' + y.toFixed(1) + 'h  (' + hrs + 'h ' + mins + 'm)';
+            }
+            return 'Bug tickets: ' + y;
+          }
+        }
+      }
+    },
+    scales: {
+      x: { ticks: { color: '#aaa', font: { size: 11 }, maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+      y: { beginAtZero: true, min: 0, position: 'left',
+        title: { display: true, text: 'p95 TTFR (business hours)', color: 'rgba(255, 167, 38, 1)', font: { size: 13 } },
+        ticks: { color: 'rgba(255, 167, 38, 1)', callback: v => v + 'h' },
+        grid: { color: 'rgba(255,255,255,0.08)' }
+      },
+      y1: { beginAtZero: true, min: 0, position: 'right',
+        title: { display: true, text: 'Bug Tickets per Week', color: 'rgba(120, 144, 156, 1)', font: { size: 13 } },
+        ticks: { color: 'rgba(120, 144, 156, 1)' },
+        grid: { drawOnChartArea: false }
+      }
+    }
+  }
+});
+
+// --- Chart 2: Current week ticket type breakdown (stacked bar) ---
+const tb = {"hw": 124, "sw": 26, "app": 4, "order": 95, "feedback": 17, "faq": 18};
+const typeTotal = tb.hw + tb.sw + tb.app + tb.order + tb.feedback + tb.faq;
+const pct = v => typeTotal ? (v / typeTotal * 100).toFixed(1) + '%' : '0%';
+
+const typeLabels = [
+  'Bug/Product Issue\n' + pct(tb.hw + tb.sw + tb.app),
+  'Order Management\n' + pct(tb.order),
+  'Feedback\n' + pct(tb.feedback),
+  'Prospective Customer FAQ\n' + pct(tb.faq)
+];
+
+new Chart(document.getElementById('typeChart'), {
+  type: 'bar',
+  data: {
+    labels: typeLabels,
+    datasets: [
+      {
+        label: 'Hardware',
+        data: [tb.hw, 0, 0, 0],
+        backgroundColor: 'rgba(239, 83, 80, 0.85)',
+        borderColor: 'rgba(239, 83, 80, 1)',
+        borderWidth: 1,
+        borderRadius: 3,
+      },
+      {
+        label: 'Software',
+        data: [tb.sw, 0, 0, 0],
+        backgroundColor: 'rgba(66, 165, 245, 0.85)',
+        borderColor: 'rgba(66, 165, 245, 1)',
+        borderWidth: 1,
+        borderRadius: 3,
+      },
+      {
+        label: 'App',
+        data: [tb.app, 0, 0, 0],
+        backgroundColor: 'rgba(102, 187, 106, 0.85)',
+        borderColor: 'rgba(102, 187, 106, 1)',
+        borderWidth: 1,
+        borderRadius: 3,
+      },
+      {
+        label: 'Order Management',
+        data: [0, tb.order, 0, 0],
+        backgroundColor: 'rgba(255, 167, 38, 0.85)',
+        borderColor: 'rgba(255, 167, 38, 1)',
+        borderWidth: 1,
+        borderRadius: 3,
+      },
+      {
+        label: 'Feedback',
+        data: [0, 0, tb.feedback, 0],
+        backgroundColor: 'rgba(171, 71, 188, 0.85)',
+        borderColor: 'rgba(171, 71, 188, 1)',
+        borderWidth: 1,
+        borderRadius: 3,
+      },
+      {
+        label: 'Prospective Customer FAQ',
+        data: [0, 0, 0, tb.faq],
+        backgroundColor: 'rgba(120, 144, 156, 0.85)',
+        borderColor: 'rgba(120, 144, 156, 1)',
+        borderWidth: 1,
+        borderRadius: 3,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#ccc', font: { size: 13 }, filter: item => item.text !== '' } },
+      tooltip: {
+        callbacks: {
+          label: function(item) {
+            const val = item.parsed.y;
+            if (val === 0) return null;
+            const p = typeTotal ? (val / typeTotal * 100).toFixed(1) : 0;
+            return item.dataset.label + ': ' + val + ' (' + p + '%)';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        ticks: { color: '#aaa', font: { size: 12 } },
+        grid: { color: 'rgba(255,255,255,0.05)' }
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        title: { display: true, text: 'Ticket Count', color: '#aaa', font: { size: 13 } },
+        ticks: { color: '#aaa', stepSize: 10 },
+        grid: { color: 'rgba(255,255,255,0.08)' }
+      }
+    }
+  }
+});
+
+</script>
+</body>
+</html>
